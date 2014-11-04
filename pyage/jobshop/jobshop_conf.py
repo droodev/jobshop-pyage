@@ -10,20 +10,24 @@ from pyage.core.locator import  RandomLocator
 from pyage.core.migration import Pyro4Migration
 from pyage.core.statistics import  TimeStatistics
 from pyage.core.stop_condition import StepLimitStopCondition
-from pyage.jobshop.crossover import  Crossover
-from pyage.jobshop.evaluation import  Evaluation
-from pyage.jobshop.initializer import  Initializer
-from pyage.jobshop.mutation import  Mutation
-from pyage.jobshop.selection import TournamentSelection
+from pyage.jobshop.problem import  Problem
+from pyage.jobshop.adjuster import  Adjuster
+from pyage.jobshop.machine import  Machine
+from pyage.jobshop.presolver import  Presolver
 
 logger = logging.getLogger(__name__)
 
 agents_count = 1
-number_of_islands = 2
+jobshop_agents = 2
 logger.debug("AGGREGATE, %s agents", agents_count)
 
+problem = Problem() 
+adjuster = Adjuster()
+machine = Machine()
+presolver= Presolver()
+
 agents = masters_factory(agents_count)
-aggregated_agents = slave_factory(number_of_islands)
+aggregated_agents = slave_factory(jobshop_agents)
 
 stop_condition = lambda: StepLimitStopCondition(100)
 
@@ -33,12 +37,5 @@ operators = lambda: [FloatRastriginEvaluation(), TournamentSelection(size=55, to
 initializer = lambda: Initializer()
 
 address_provider = address.SequenceAddressProvider
-
-migration = Pyro4Migration
-locator = RandomLocator
-
-ns_hostname = lambda: os.environ['NS_HOSTNAME']
-pyro_daemon = Pyro4.Daemon()
-daemon = lambda: pyro_daemon
 
 stats = TimeStatistics

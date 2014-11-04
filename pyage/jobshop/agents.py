@@ -5,7 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class MasterAgent(Addressable, AbstractAgent):
+class MasterAgent(object):
     @Inject("slaves:_MasterAgent__slaves")
     def __init__(self, name=None):
         self.name = name
@@ -18,28 +18,8 @@ class MasterAgent(Addressable, AbstractAgent):
         for agent in self.__slaves.values():
             agent.step()
 
-    def remove_agent(self, agent):
-        agent = self.__slaves[agent.get_address()]
-        del self.__slaves[agent.get_address()]
-        agent.parent = None
-        return agent
-
-    def add_agent(self, agent):
-        agent.parent = self
-        self.__slaves[agent.get_address()] = agent
-
     def get_agents(self):
         return self.__slaves.values()
-
-    def get_fitness(self):
-        try:
-            return max(agent.get_fitness() for agent in self.__slaves.values())
-        except ValueError:
-            return None
-
-    def get_best_genotype(self):
-        return max(self.__slaves.values(), key=lambda a: a.get_fitness()).get_best_genotype()
-
 
 class SlaveAgent():
     #TODO
