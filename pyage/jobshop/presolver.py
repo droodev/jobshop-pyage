@@ -1,3 +1,4 @@
-class Prresolver(object):
+class Presolver(object):
     def __init__(self):
-        raise NotImplementedError()
+        #raise NotImplementedError()
+        pass

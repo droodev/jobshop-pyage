@@ -4,7 +4,7 @@ import os
 import Pyro4
 
 from pyage.core import address
-from pyage.jobshop.agents import masters_factory
+from pyage.jobshop.agents import masters_factory, slaves_factory
 from pyage.core.agent.aggregate import AggregateAgent
 from pyage.core.locator import  RandomLocator
 from pyage.core.migration import Pyro4Migration
@@ -14,6 +14,7 @@ from pyage.jobshop.problem import  Problem
 from pyage.jobshop.adjuster import  Adjuster
 from pyage.jobshop.machine import  Machine
 from pyage.jobshop.presolver import  Presolver
+from pyage.jobshop.problemGenerator import  ProblemGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +26,10 @@ problem = Problem()
 adjuster = Adjuster()
 machine = Machine()
 presolver= Presolver()
+problemGenerator = lambda: ProblemGenerator(50)
 
 agents = masters_factory(agents_count)
-aggregated_agents = slave_factory(jobshop_agents)
+slaves = slaves_factory(jobshop_agents)
 
 stop_condition = lambda: StepLimitStopCondition(100)
 
