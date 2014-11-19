@@ -8,13 +8,13 @@ from pyage.jobshop.agents import masters_factory, slaves_factory
 from pyage.core.agent.aggregate import AggregateAgent
 from pyage.core.locator import  RandomLocator
 from pyage.core.migration import Pyro4Migration
-from pyage.core.statistics import  TimeStatistics
 from pyage.core.stop_condition import StepLimitStopCondition
 from pyage.jobshop.problem import  Problem
 from pyage.jobshop.adjuster import  Adjuster
 from pyage.jobshop.machine import  Machine
 from pyage.jobshop.presolver import  Presolver
 from pyage.jobshop.problemGenerator import  ProblemGenerator
+from pyage.jobshop.dummyStats import DummyStats
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ agents_count = 1
 jobshop_agents = 2
 logger.debug("AGGREGATE, %s agents", agents_count)
 
-problem = Problem() 
+#problem = Problem() 
 adjuster = Adjuster()
 machine = Machine()
 presolver= Presolver()
@@ -40,4 +40,4 @@ initializer = lambda: Initializer()
 
 address_provider = address.SequenceAddressProvider
 
-stats = TimeStatistics
+stats = DummyStats

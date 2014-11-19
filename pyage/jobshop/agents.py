@@ -18,7 +18,8 @@ class MasterAgent(object):
     def step(self):
         for agent in self.__slaves.values():
             if self._MasterAgent__problemGenerator.check_new_problem(self.steps):
-                logger.debug("New problem")
+                new_problem = self._MasterAgent__problemGenerator.step(self.steps)
+                logger.debug("NEW PROBLEM: \n%s", new_problem)
             agent.step()
         self.steps += 1
 
