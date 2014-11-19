@@ -13,7 +13,8 @@ class ProblemGenerator(object):
 				new_job = Job(step_nr/self.problemTick,
 							[Task(0,2), Task(2,2), Task(1,2)]
 							)
-				return new_job
+
+				return Problem([new_job])
 
 
 	def check_new_problem(self, step_nr):

@@ -9,7 +9,10 @@ class DummyStats(Statistics):
 		pass
 
 	def update(self, step_count, agents):
-		pass
+		if step_count % 50 == 0:
+			best_agent = min(agents, key= lambda x: x.get_fitness)
+			logger.info("\nBEST SOLUTION:\n%s",
+				best_agent.get_solution())
 
 	def summarize(self, agents):
 		pass

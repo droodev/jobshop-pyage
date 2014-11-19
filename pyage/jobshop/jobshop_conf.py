@@ -24,7 +24,7 @@ logger.debug("AGGREGATE, %s agents", agents_count)
 
 #problem = Problem() 
 adjuster = Adjuster()
-machine = Machine()
+#machine = Machine()
 presolver= Presolver()
 problemGenerator = lambda: ProblemGenerator(50)
 
