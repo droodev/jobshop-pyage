@@ -23,11 +23,15 @@ class MasterAgent(object):
         self.manufacture = Manufacture(3)
         self.timeKeeper = TimeKeeper(5,-1)
         self.problem = None
+        self.assigned = False
 
     def step(self):
         self.timeKeeper.step(self.steps)
-        if self.timeKeeper.get_time() == 0:
+        if (not self.assigned) and (self.timeKeeper.get_time() == 0):
             self.manufacture.assign_tasks(self.get_solution(), self.problem)
+            logger.debug("Problem assigned: \n%s", self.problem)
+            self.assigned = True
+
         self.manufacture.time_tick(self.timeKeeper.get_time())
 
         for agent in self.__slaves.values():
@@ -37,6 +41,11 @@ class MasterAgent(object):
                 agent.append_problem(new_problem)
                 logger.debug("NEW PROBLEM: \n%s", new_problem)
             agent.step()
+
+
+        if self.steps == 40:
+            sol_part = self.manufacture.get_solution_part_as_problem(1)
+            logger.debug("%s", sol_part)
 
         self.steps += 1
 

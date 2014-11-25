@@ -19,6 +19,8 @@ class Job(object):
 	def __init__(self, jid, tasks_list):
 		self.jid = jid
 		self.tasks_list = tasks_list
+		for task in tasks_list:
+			task.job = self
 
 	def __str__(self):
 		caption = self.str_of_job_name()
@@ -59,6 +61,9 @@ class Task(object):
 
 	def get_task_machine(self):
 		return self.machine
+
+	def get_task_job(self):
+		return self.job
 
 class Solution(object):
 	def __init__(self, machines_nr):

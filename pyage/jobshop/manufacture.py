@@ -1,6 +1,7 @@
 import logging
 from machine import Machine
 import copy
+from problem import Job, Problem
 
 logger = logging.getLogger(__name__)
 
@@ -39,3 +40,29 @@ class Manufacture(object):
 					logger.debug("New endtime: %d", machine.taskEndTime)
 				except IndexError:
 					logger.debug("Nothing to add")
+
+	def get_solution_part_as_problem(self, reverse_depth):
+		logger.debug("Taking part as problem")
+		tasks_to_leave = 2
+		tasks_list = []
+		for depth in xrange(reverse_depth):
+			for machine in self.machines:
+				machine_jobs = self.solution.get_machine_job(machine.idd)
+				if len(machine_jobs) < reverse_depth + tasks_to_leave:
+					continue
+				#taking_index = len(machine_tasks)-depth-1
+				last_job = machine_jobs[-1]
+				tasks_list.append(last_job.get_task_for_machine(machine.idd))
+				machine_jobs.remove(last_job)
+		
+		#creating problem from tasks_list
+		jobs_categorized = dict([(t.job, []) for t in tasks_list])
+		for task in tasks_list:
+			jobs_categorized[task.job].append(task)
+
+		counter = 0
+		jobs_lists = []
+		for tlist in jobs_categorized.values():
+			jobs_lists.append(Job(counter, tlist))
+			counter +=1
+		return Problem(jobs_lists)
