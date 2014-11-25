@@ -74,6 +74,9 @@ class Solution(object):
 	def append_job_to_machine(self, machine_nr, job):
 		self.machines[machine_nr].append(job)
 
+	def remove_job_from_machine(self,machine_nr, job):
+		self.machines[machine_nr].remove(job)
+
 	def set_completion_time(self, completion_time):
 		self.completion_time = completion_time
 

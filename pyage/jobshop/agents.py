@@ -29,7 +29,7 @@ class MasterAgent(object):
         self.timeKeeper.step(self.steps)
         if (not self.assigned) and (self.timeKeeper.get_time() == 0):
             self.manufacture.assign_tasks(self.get_solution(), self.problem)
-            logger.debug("Problem assigned: \n%s", self.problem)
+            logger.debug("Solution assigned: \n%s", self.get_solution())
             self.assigned = True
 
         self.manufacture.time_tick(self.timeKeeper.get_time())
@@ -45,7 +45,7 @@ class MasterAgent(object):
 
         if self.steps == 40:
             sol_part = self.manufacture.get_solution_part_as_problem(1)
-            logger.debug("%s", sol_part)
+            logger.debug("problem part\n%s", sol_part)
 
         self.steps += 1
 

@@ -12,7 +12,7 @@ class Manufacture(object):
 		self.machines = [Machine(i) for i in xrange(machines_nr)]
 		#to be fixed - workaround
 		for machine in self.machines:
-			machine.taskEndTime = -1
+			machine.taskEndTime = 0
 		self.time = -1
 
 	def assign_tasks(self, solution, problem):
@@ -24,8 +24,8 @@ class Manufacture(object):
 		if new_time is self.time:
 			return
 		logger.debug("Time tick: %d->%d", self.time, new_time)
-		self.__check_and_update(self.time)
 		self.time = new_time
+		self.__check_and_update(self.time)
 
 	def __check_and_update(self, old_time):
 		logger.debug("Updating!")
@@ -36,14 +36,14 @@ class Manufacture(object):
 					current_job = self.solution.get_machine_job(machine.idd)[0]
 					del self.solution.get_machine_job(machine.idd)[0]
 					task = current_job.get_task_for_machine(machine.idd)
-					machine.taskEndTime = old_time+1+task.get_duration()
+					machine.taskEndTime = old_time+task.get_duration()
 					logger.debug("New endtime: %d", machine.taskEndTime)
 				except IndexError:
 					logger.debug("Nothing to add")
 
 	def get_solution_part_as_problem(self, reverse_depth):
 		logger.debug("Taking part as problem")
-		tasks_to_leave = 2
+		tasks_to_leave = 1
 		tasks_list = []
 		for depth in xrange(reverse_depth):
 			for machine in self.machines:
@@ -53,8 +53,9 @@ class Manufacture(object):
 				#taking_index = len(machine_tasks)-depth-1
 				last_job = machine_jobs[-1]
 				tasks_list.append(last_job.get_task_for_machine(machine.idd))
-				machine_jobs.remove(last_job)
-		
+				self.solution.remove_job_from_machine(machine.idd, last_job)
+				#machine_jobs = machine_jobs[:-1]
+				#machine_jobs.remove(last_job)
 		#creating problem from tasks_list
 		jobs_categorized = dict([(t.job, []) for t in tasks_list])
 		for task in tasks_list:
@@ -65,4 +66,6 @@ class Manufacture(object):
 		for tlist in jobs_categorized.values():
 			jobs_lists.append(Job(counter, tlist))
 			counter +=1
+
+		logger.debug("left solution: \n%s", self.solution)
 		return Problem(jobs_lists)
