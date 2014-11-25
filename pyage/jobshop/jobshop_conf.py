@@ -40,4 +40,4 @@ initializer = lambda: Initializer()
 
 address_provider = address.SequenceAddressProvider
 
-stats = DummyStats
+stats = lambda: DummyStats(40)

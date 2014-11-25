@@ -3,6 +3,8 @@ from pyage.core.agent.agent import AbstractAgent
 from pyage.core.inject import Inject
 from machine import Machine
 from problem import Solution
+from manufacture import Manufacture
+from timeKeeper import TimeKeeper
 import logging
 import itertools   
 import copy
@@ -17,15 +19,25 @@ class MasterAgent(object):
         super(MasterAgent, self).__init__()
         for agent in self.__slaves.values():
             agent.parent = self
-        self.steps = 0
+        self.steps = 1
+        self.manufacture = Manufacture(3)
+        self.timeKeeper = TimeKeeper(5,-1)
+        self.problem = None
 
     def step(self):
+        self.timeKeeper.step(self.steps)
+        if self.timeKeeper.get_time() == 0:
+            self.manufacture.assign_tasks(self.get_solution(), self.problem)
+        self.manufacture.time_tick(self.timeKeeper.get_time())
+
         for agent in self.__slaves.values():
             if self._MasterAgent__problemGenerator.check_new_problem(self.steps):
                 new_problem = self._MasterAgent__problemGenerator.step(self.steps)
+                self.problem = new_problem
                 agent.append_problem(new_problem)
                 logger.debug("NEW PROBLEM: \n%s", new_problem)
             agent.step()
+
         self.steps += 1
 
     def get_agents(self):
@@ -42,7 +54,7 @@ class MasterAgent(object):
 
 class SlaveAgent(object):
     def __init__(self):
-        self.steps = 0
+        self.steps = 1
 
     def append_problem(self, problem):
         self.solver = SimpleSolver(3, problem)
@@ -90,22 +102,21 @@ class SimpleSolver(object):
         currentTime = 0
         lastTimeAdded = 0
         solution = Solution(self.machines_nr)
-        #machineSolutions = [[]] * len(machines)
-        #for i in xrange(len(machines)):
-        #   machineSolutions[i] = []
+        jobs_tasks = {}
+        for job in jobList:
+            jobs_tasks[job.jid] = list(copy.deepcopy(job.get_tasks_list()))
               
         while jobList:
             for job in jobList:
-                task = job.get_tasks_list()[0]
+                task = jobs_tasks[job.jid][0]
                 if currentTime >= machines[task.machine].taskEndTime and self.__notInProgress(job, machines, currentTime):
                     machines[task.machine].taskEndTime = currentTime + task.get_duration()
                     machines[task.machine].jobInProgress = job.get_jid()
                     lastTimeAdded = task.get_duration()
                     task.set_start_time(currentTime)
-                    #machineSolutions[task.machine].append(job)
                     solution.append_job_to_machine(task.machine, job)
-                    job.get_tasks_list().remove(task)
-                if not job.get_tasks_list():
+                    jobs_tasks[job.jid].remove(task)
+                if not jobs_tasks[job.jid]:
                     jobList.remove(job)
             currentTime += 1
         solution.set_completion_time(currentTime-1+lastTimeAdded)

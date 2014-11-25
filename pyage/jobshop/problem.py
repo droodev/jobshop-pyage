@@ -1,3 +1,5 @@
+import copy
+
 class Problem(object):
     def __init__(self, jobs_list):
         self.jobs_list = jobs_list
@@ -6,7 +8,12 @@ class Problem(object):
     	return "\n".join(map(str,self.jobs_list))
 
     def get_jobs_list(self):
-    	return self.jobs_list
+    	return list(copy.deepcopy(self.jobs_list))
+
+    def get_job_by_jid(self, jid):
+    	for job in self.jobs_list:
+    		if job.jid == jid:
+    			return job
 
 class Job(object):
 	def __init__(self, jid, tasks_list):
@@ -30,6 +37,12 @@ class Job(object):
 	def get_jid(self):
 		return self.jid
 
+	def get_task_for_machine(self, mid):
+		for task in self.tasks_list:
+			if task.get_task_machine() is mid:
+				return task
+		raise Exception()
+
 class Task(object):
 	def __init__(self, machine, duration):
 		self.machine = machine
@@ -43,6 +56,9 @@ class Task(object):
 
 	def set_start_time(self, time):
 		self.start_time=time
+
+	def get_task_machine(self):
+		return self.machine
 
 class Solution(object):
 	def __init__(self, machines_nr):
@@ -58,6 +74,9 @@ class Solution(object):
 
 	def get_completion_time(self):
 		return self.completion_time
+
+	def get_machine_job(self, machine_nr):
+		return self.machines[machine_nr]
 
 	def __str__(self):
 		machine_strings_list = []

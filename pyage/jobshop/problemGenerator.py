@@ -7,7 +7,7 @@ class ProblemGenerator(object):
 
 	def step(self, step_nr):
 		if self.check_new_problem(step_nr):
-			if step_nr == 0:
+			if step_nr == 1:
 				return self.__create_initial_problem()
 			else:
 				new_job = Job(step_nr/self.problemTick,
@@ -21,11 +21,11 @@ class ProblemGenerator(object):
 		return self.__new_problem_check(step_nr)
 
 	def __new_problem_check(self, step_nr):
-		return step_nr % self.problemTick == 0
+		return step_nr % self.problemTick == 1
 
 	def __create_initial_problem(self):
 		job0 = Job(0,
-					[Task(0,5), Task(1,8), Task(2,3)]
+					[Task(1,8), Task(2,3)]
 					)
 		job1 = Job(1,
 					[Task(2,7), Task(0,3), Task(1,9)]
