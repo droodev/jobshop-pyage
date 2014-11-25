@@ -19,7 +19,7 @@ from pyage.jobshop.dummyStats import DummyStats
 logger = logging.getLogger(__name__)
 
 agents_count = 1
-jobshop_agents = 2
+jobshop_agents = 10
 logger.debug("AGGREGATE, %s agents", agents_count)
 
 #problem = Problem() 
@@ -40,4 +40,4 @@ initializer = lambda: Initializer()
 
 address_provider = address.SequenceAddressProvider
 
-stats = lambda: DummyStats(40)
+stats = lambda: DummyStats(10000000000)

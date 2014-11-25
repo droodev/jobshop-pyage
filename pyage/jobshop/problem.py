@@ -5,7 +5,7 @@ class Problem(object):
         self.jobs_list = jobs_list
 
     def __str__(self):
-    	return "\n".join(map(str,self.jobs_list))
+    	return "Problem consisted of: \n" + "\n".join(map(str,self.jobs_list))
 
     def get_jobs_list(self):
     	return list(copy.deepcopy(self.jobs_list))
@@ -14,6 +14,18 @@ class Problem(object):
     	for job in self.jobs_list:
     		if job.jid == jid:
     			return job
+
+    def merge_with(self, prob):
+    	new_jobs_list = self.get_jobs_list() + prob.get_jobs_list()
+    	counter = 0
+    	for job in new_jobs_list:
+    		job.jid = counter
+    		counter +=1
+    	return Problem(new_jobs_list)
+
+    def __eq__(self, other):
+    	return self.jobs_list == other.jobs_list
+
 
 class Job(object):
 	def __init__(self, jid, tasks_list):
@@ -45,6 +57,9 @@ class Job(object):
 				return task
 		raise Exception()
 
+	def __eq__(self, other):
+		return self.tasks_list == other.tasks_list
+
 class Task(object):
 	def __init__(self, machine, duration):
 		self.machine = machine
@@ -64,6 +79,9 @@ class Task(object):
 
 	def get_task_job(self):
 		return self.job
+
+	def __eq__(self, other):
+		return self.machine == other.machine and self.duration == other.duration
 
 class Solution(object):
 	def __init__(self, machines_nr):

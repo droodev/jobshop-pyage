@@ -15,9 +15,9 @@ class Manufacture(object):
 			machine.taskEndTime = 0
 		self.time = -1
 
-	def assign_tasks(self, solution, problem):
+	def assign_tasks(self, solution):
+		logger.debug("Manufacture solution assigned: \n%s", solution)
 		self.solution = copy.deepcopy(solution)
-		self.problem = problem
 
 
 	def time_tick(self, new_time):
@@ -28,9 +28,8 @@ class Manufacture(object):
 		self.__check_and_update(self.time)
 
 	def __check_and_update(self, old_time):
-		logger.debug("Updating!")
 		for machine in self.machines:
-			if machine.taskEndTime is old_time:
+			if machine.taskEndTime <= old_time:
 				logger.debug("Updating machine: %d", machine.idd)
 				try:
 					current_job = self.solution.get_machine_job(machine.idd)[0]
@@ -50,12 +49,9 @@ class Manufacture(object):
 				machine_jobs = self.solution.get_machine_job(machine.idd)
 				if len(machine_jobs) < reverse_depth + tasks_to_leave:
 					continue
-				#taking_index = len(machine_tasks)-depth-1
 				last_job = machine_jobs[-1]
 				tasks_list.append(last_job.get_task_for_machine(machine.idd))
 				self.solution.remove_job_from_machine(machine.idd, last_job)
-				#machine_jobs = machine_jobs[:-1]
-				#machine_jobs.remove(last_job)
 		#creating problem from tasks_list
 		jobs_categorized = dict([(t.job, []) for t in tasks_list])
 		for task in tasks_list:

@@ -5,6 +5,7 @@ from machine import Machine
 from problem import Solution
 from manufacture import Manufacture
 from timeKeeper import TimeKeeper
+from problemGenerator import PredictedProblemGenerator
 import logging
 import itertools   
 import copy
@@ -19,36 +20,61 @@ class MasterAgent(object):
         super(MasterAgent, self).__init__()
         for agent in self.__slaves.values():
             agent.parent = self
+        logger.debug("Slaves number: %d", len(self.__slaves.values()))
         self.steps = 1
-        self.manufacture = Manufacture(3)
+        self.manufacture = Manufacture(4)
         self.timeKeeper = TimeKeeper(5,-1)
         self.problem = None
         self.assigned = False
+        self.predictor = PredictedProblemGenerator()
 
     def step(self):
         self.timeKeeper.step(self.steps)
         if (not self.assigned) and (self.timeKeeper.get_time() == 0):
-            self.manufacture.assign_tasks(self.get_solution(), self.problem)
-            logger.debug("Solution assigned: \n%s", self.get_solution())
+            self.manufacture.assign_tasks(self.get_solution())
             self.assigned = True
+            self.__assign_predicted_and_solution_part()
+
 
         self.manufacture.time_tick(self.timeKeeper.get_time())
 
+        if self._MasterAgent__problemGenerator.check_new_problem(self.steps):
+            new_problem = self._MasterAgent__problemGenerator.step(self.steps)
+            self.problem = new_problem
+            logger.debug("New problem came: \n%s", new_problem)
+            if(self.steps == 1):
+                for agent in self.__slaves.values():
+                    agent.append_problem(new_problem, None)
+            else:
+                for agent in self.__slaves.values():
+                    if agent.check_predicated_problem(new_problem):
+                        logger.debug("Agent with good pred_problem")
+                        new_solution = agent.get_solution()
+                        #logger.debug("Pretty new solution\n %s",new_solution)
+                        self.manufacture.assign_tasks(new_solution)
+                        self.__assign_predicted_and_solution_part()
+                        break
+
         for agent in self.__slaves.values():
-            if self._MasterAgent__problemGenerator.check_new_problem(self.steps):
-                new_problem = self._MasterAgent__problemGenerator.step(self.steps)
-                self.problem = new_problem
-                agent.append_problem(new_problem)
-                logger.debug("NEW PROBLEM: \n%s", new_problem)
             agent.step()
-
-
-        if self.steps == 40:
-            sol_part = self.manufacture.get_solution_part_as_problem(1)
-            logger.debug("problem part\n%s", sol_part)
 
         self.steps += 1
 
+    def __get_predicted_and_solution_problems(self, solution_part_problem):
+        predicted = self.predictor.get_predicted_problems()
+        merged_problems  = {}
+        for pred in predicted:
+            merged_problems[solution_part_problem.merge_with(pred)]=pred
+        return merged_problems
+
+    def __assign_predicted_and_solution_part(self):
+        solution_part_problem = self.manufacture.get_solution_part_as_problem(2)
+        merged_problems = self.__get_predicted_and_solution_problems(solution_part_problem)
+        if len(self.__slaves) != len(merged_problems):
+            raise Exception("Not equal: agents and predicted problems")
+        for it in xrange(len(self.__slaves)):
+            merged_problem = merged_problems.keys()[it]
+            self.__slaves.values()[it].append_problem(merged_problem, merged_problems[merged_problem])
     def get_agents(self):
         return self.__slaves.values()
 
@@ -62,14 +88,17 @@ class MasterAgent(object):
         return min_fitness_agent.get_solution()
 
 class SlaveAgent(object):
-    def __init__(self):
+    def __init__(self, aid):
         self.steps = 1
+        self.aid = aid
 
-    def append_problem(self, problem):
-        self.solver = SimpleSolver(3, problem)
+    def append_problem(self, problem, predicted_problem):
+        logger.debug("%d New problem for slave appended: \n%s\n with predicted\n %s ", self.aid, problem, predicted_problem)
+        self.solver = SimpleSolver(4, problem)
+        self.predicted_problem = predicted_problem
 
     def step(self):
-        logger.debug("Slave step")
+        #logger.debug("Slave step")
         self.solver.step()
         self.steps += 1
 
@@ -78,6 +107,13 @@ class SlaveAgent(object):
 
     def get_solution(self):
         return self.solver.get_solution()
+
+    def check_predicated_problem(self, checked_problem):
+        if checked_problem == self.predicted_problem:
+            logger.debug("%d Checked: %s\n",self.aid, checked_problem)
+            logger.debug("%d predicted: %s\n",self.aid, self.predicted_problem)
+            return True
+
 
 class SimpleSolver(object):
 
@@ -114,7 +150,7 @@ class SimpleSolver(object):
         jobs_tasks = {}
         for job in jobList:
             jobs_tasks[job.jid] = list(copy.deepcopy(job.get_tasks_list()))
-              
+        
         while jobList:
             for job in jobList:
                 task = jobs_tasks[job.jid][0]
@@ -150,8 +186,8 @@ def slaves_factory(count):
 def _agents_factory(count, agent_type):
     def factory():
         agents = {}
-        for _ in xrange(count):
-            agent = agent_type()
-            agents["Master_" + str(count)] = agent
+        for i in xrange(count):
+            agent = agent_type(i)
+            agents["Master_" + str(i)] = agent
         return agents
     return factory
