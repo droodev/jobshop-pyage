@@ -117,7 +117,7 @@ class Solution(object):
 		return "\n".join(machine_strings_list)
 
 class JobShopGenotype(object):
-    ''' uporzadkowana lista [Jobnumber, Jobnumber, Jobnumber,...] o długosci rownej ilosci taskow
+    ''' uporzadkowana lista [Jobnumber, Jobnumber, Jobnumber,...] o dlugosci rownej ilosci taskow
         n-te wystapienie danego numeru joba oznacza zakolejkowanie w danej chwili n-tego taska tego joba'''
     def __init__(self, joblist):
         self.genes = joblist
