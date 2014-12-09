@@ -110,4 +110,4 @@ class GanttStatistics(Statistics):
         for a in agents:
             for his in a.get_history():
                 self.gantt.add_task(his[0], his[1], his[2], his[3])
-                self.gantt.generate('Agent ' + str(i) + ': ' + his[4])
+                self.gantt.generate('Agent ' + str(i) + '-' + his[4])
