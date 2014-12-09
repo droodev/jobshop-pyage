@@ -1,13 +1,14 @@
 import logging
-from machine import Machine
 import copy
+
+from machine import Machine
 from problem import Job, Problem
-from pyage.core.inject import Inject
+
 
 logger = logging.getLogger(__name__)
 
 class Manufacture(object):
-    @Inject("gantt")
+    history = []
     def __init__(self, machines_nr):
         self.machines_nr = machines_nr
         self.machines = [Machine(i) for i in xrange(machines_nr)]
@@ -38,8 +39,12 @@ class Manufacture(object):
                     task = current_job.get_task_for_machine(machine.idd)
                     machine.taskEndTime = old_time+task.get_duration()
                     logger.debug("New endtime: %d", machine.taskEndTime)
+                    self.history.append([ machine.idd, current_job.get_jid(), old_time, task.get_duration(), 'Tick ' + str(old_time) ])
                 except IndexError:
                     logger.debug("Nothing to add")
+
+    def get_history(self):
+        return self.history
 
     def get_solution_part_as_problem(self, reverse_depth):
         logger.debug("Taking part as problem")

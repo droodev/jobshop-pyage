@@ -1,14 +1,14 @@
-from pyage.core.address import Addressable
-from pyage.core.agent.agent import AbstractAgent
+import logging
+import itertools
+import copy
+
 from pyage.core.inject import Inject
 from machine import Machine
 from problem import Solution
 from manufacture import Manufacture
 from timeKeeper import TimeKeeper
 from problemGenerator import PredictedProblemGenerator
-import logging
-import itertools   
-import copy
+
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +27,9 @@ class MasterAgent(object):
         self.problem = None
         self.assigned = False
         self.predictor = PredictedProblemGenerator()
+
+    def get_history(self):
+        return self.manufacture.get_history()
 
     def step(self):
         self.timeKeeper.step(self.steps)

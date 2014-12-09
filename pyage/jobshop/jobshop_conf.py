@@ -15,6 +15,8 @@ from pyage.jobshop.machine import  Machine
 from pyage.jobshop.presolver import  Presolver
 from pyage.jobshop.problemGenerator import  ProblemGenerator
 from pyage.jobshop.dummyStats import DummyStats
+from pyage.core.statistics import  GanttGenerator
+from pyage.core.statistics import  GanttStatistics
 
 logger = logging.getLogger(__name__)
 
@@ -40,4 +42,4 @@ initializer = lambda: Initializer()
 
 address_provider = address.SequenceAddressProvider
 
-stats = lambda: DummyStats(10000000000)
+stats = GanttStatistics #lambda: DummyStats(10000000000)
