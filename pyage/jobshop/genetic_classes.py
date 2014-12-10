@@ -13,15 +13,27 @@ from pyage.solutions.evolution.crossover import AbstractCrossover
 from pyage.jobshop.problem import Solution
 
 class JobShopGenotype(object):
-    ''' uporzadkowana lista [Jobnumber, Jobnumber, Jobnumber,...] o długosci rownej ilosci taskow
+    ''' uporzadkowana lista [Jobnumber, Jobnumber, Jobnumber,...] o dlugosci rownej ilosci taskow
         n-te wystapienie danego numeru joba oznacza zakolejkowanie w danej chwili n-tego taska tego joba'''
     def __init__(self, joblist):
         self.genes = joblist
         self.fitness = None
         
+    def __init_from_problem__(self,problem):
+        self.problem = problem
+        self.genes = nonrandom_generate_genes(problem)
+        self.fitness = None
+        
     def getSolutionOutOfGenotype(self):
         return BasicJobShopEvaluation.schedule(self.genes)
         
+    def nonrandom_generate_genes(self,problem):
+        joblist = []
+        for job in problem:
+            for task in job:
+                joblist.append(job.jid)
+        return joblist
+    
 class BasicJobShopEvaluation(Operator):
     
     def __init__(self,machines_nr):
@@ -49,17 +61,16 @@ class BasicJobShopEvaluation(Operator):
             jobs_tasks[job.jid] = job.get_tasks_list()
         
         while jobList:
-            for job in jobList:
-                task = jobs_tasks[job.jid][0]
-                if currentTime >= machines[task.machine].taskEndTime and self.__notInProgress(job, machines, currentTime):
-                    machines[task.machine].taskEndTime = currentTime + task.get_duration()
-                    machines[task.machine].jobInProgress = job.get_jid()
-                    lastTimeAdded = task.get_duration()
-                    task.set_start_time(currentTime)
-                    solution.append_job_to_machine(task.machine, job)
-                    jobs_tasks[job.jid].remove(task)
-                if not jobs_tasks[job.jid]:
-                    jobList.remove(job)
+            job = jobList[0]
+            task = jobs_tasks[job.jid][0]
+            if currentTime >= machines[task.machine].taskEndTime and self.__notInProgress(job, machines, currentTime):
+                machines[task.machine].taskEndTime = currentTime + task.get_duration()
+                machines[task.machine].jobInProgress = job.get_jid()
+                lastTimeAdded = task.get_duration()
+                task.set_start_time(currentTime)
+                solution.append_job_to_machine(task.machine, job)
+                jobs_tasks[job.jid].remove(task)
+                jobList.remove[job.jid]
             currentTime += 1
         solution.set_completion_time(currentTime-1+lastTimeAdded)
         return solution
@@ -70,7 +81,7 @@ class BasicJobShopEvaluation(Operator):
                 return False
         return True
 
-'''zamiana miejscami dwoch losowych genów'''
+'''zamiana miejscami dwoch losowych genow'''
 class BasicJobShopMutation(AbstractMutation):
     
     def __init__(self,probability=0.1):

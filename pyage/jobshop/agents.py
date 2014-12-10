@@ -1,6 +1,7 @@
 from pyage.core.address import Addressable
 from pyage.core.agent.agent import AbstractAgent
 from pyage.core.inject import Inject
+from pyage.jobshop.genetic_classes import *
 from machine import Machine
 from problem import Solution
 from manufacture import Manufacture
@@ -91,15 +92,20 @@ class SlaveAgent(object):
     def __init__(self, aid):
         self.steps = 1
         self.aid = aid
+        self.evaluation = BasicJobShopEvaluation(4)
+        self.mutation = BasicJobShopMutation()
+        
 
     def append_problem(self, problem, predicted_problem):
         logger.debug("%d New problem for slave appended: \n%s\n with predicted\n %s ", self.aid, problem, predicted_problem)
         self.solver = SimpleSolver(4, problem)
+        self.genotype = JobShopGenotype(problem)
         self.predicted_problem = predicted_problem
 
     def step(self):
         #logger.debug("Slave step")
         self.solver.step()
+        
         self.steps += 1
 
     def get_fitness(self):
