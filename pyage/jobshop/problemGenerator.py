@@ -6,19 +6,19 @@ from time import time
 class Randomized(object):
 
 	def init_random(self, random_obj):
-		self.random = random_obj
+		self._random = random_obj
 
 	def random_check(self):
-		if "random" not in self.__dict__:
+		if "_random" not in self.__dict__:
 			raise Exception("Randomized object not initialized properly")
 
 class Distribution(Randomized):
 
 	def next(self):
 		self.random_check()
-		return self.getRandom()
+		return self._next()
 
-	def getRandom(self):
+	def _next(self):
 		raise NotImplementedException()
 
 class UniformIntDistribution(Distribution):
@@ -27,8 +27,8 @@ class UniformIntDistribution(Distribution):
 		self.start = start_in
 		self.end = end_in
 
-	def getRandom(self):
-		return self.random.randint(self.start, self.end)
+	def _next(self):
+		return self._random.randint(self.start, self.end)
 
 
 class ProblemGenerator(object):
