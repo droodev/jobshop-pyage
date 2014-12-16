@@ -99,15 +99,3 @@ class NoStatistics(Statistics):
 
     def summarize(self, agents):
         pass
-
-class GanttStatistics(Statistics):
-    gantt = GanttGenerator(None, 'gantt')
-    def update(self, step_count, agents):
-        pass
-
-    def summarize(self, agents):
-        i = 1
-        for a in agents:
-            for his in a.get_history():
-                self.gantt.add_task(his[0], his[1], his[2], his[3])
-                self.gantt.generate('Agent ' + str(i) + '-' + his[4])

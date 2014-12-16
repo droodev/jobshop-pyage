@@ -29,17 +29,17 @@ class Manufacture(object):
         self.time = new_time
         self.__check_and_update(self.time)
 
-    def __check_and_update(self, old_time):
+    def __check_and_update(self, time):
         for machine in self.machines:
-            if machine.taskEndTime <= old_time:
+            if machine.taskEndTime <= time:
                 logger.debug("Updating machine: %d", machine.idd)
                 try:
                     current_job = self.solution.get_machine_job(machine.idd)[0]
                     del self.solution.get_machine_job(machine.idd)[0]
                     task = current_job.get_task_for_machine(machine.idd)
-                    machine.taskEndTime = old_time+task.get_duration()
+                    machine.taskEndTime = time+task.get_duration()
                     logger.debug("New endtime: %d", machine.taskEndTime)
-                    self.history.append([ machine.idd, current_job.get_jid(), old_time, task.get_duration(), 'Tick ' + str(old_time) ])
+                    self.history.append([ machine.idd, current_job.get_jid(), time, task.get_duration(), 'Tick ' + str(time) ])
                 except IndexError:
                     logger.debug("Nothing to add")
 
