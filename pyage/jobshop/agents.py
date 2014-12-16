@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 class MasterAgent(object):
     @Inject("slaves:_MasterAgent__slaves")
     @Inject("problemGenerator:_MasterAgent__problemGenerator")
+    @Inject("predictedProblemGenerator:_MasterAgent__predictor")
     def __init__(self, name=None):
         self.name = name
         super(MasterAgent, self).__init__()
@@ -26,7 +27,6 @@ class MasterAgent(object):
         self.timeKeeper = TimeKeeper(5,-1)
         self.problem = None
         self.assigned = False
-        self.predictor = PredictedProblemGenerator()
 
     def get_history(self):
         return self.manufacture.get_history()
@@ -64,7 +64,7 @@ class MasterAgent(object):
         self.steps += 1
 
     def __get_predicted_and_solution_problems(self, solution_part_problem):
-        predicted = self.predictor.get_predicted_problems()
+        predicted = self.__predictor.get_predicted_problems()
         merged_problems  = {}
         for pred in predicted:
             merged_problems[solution_part_problem.merge_with(pred)]=pred

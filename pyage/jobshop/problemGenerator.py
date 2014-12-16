@@ -33,61 +33,41 @@ class UniformIntDistribution(Distribution):
 
 class ProblemGenerator(object):
 
-	def __init__(self, problemTick):
-		self.problemTick = problemTick
-		self.predefined_jobs = PredictedProblemGenerator().predefined_jobs
-		self.__gen = NewProblemGenerator(
-				machines_number = 3,
-				jobs_number = 5,
-				job_duration_distrib = UniformIntDistribution(7,10),
-				tasks_number_distrib = UniformIntDistribution(2,3),
-				tasks_provider = TasksProvider(3)
-			)
+	def __init__(self, problemTick, start_problems_provider, incomming_problems_provider):
+		self.__problemTick = problemTick
+		self.__start_prov = start_problems_provider
+		self.__incomm_prov = incomming_problems_provider
+		
 
 	def step(self, step_nr):
 		if self.check_new_problem(step_nr):
 			if step_nr == 1:
 				return self.__create_initial_problem()
 			else:
-				#new_job = random.choice(self.predefined_jobs)
-				new_job = self.predefined_jobs[6]
-				return Problem([new_job])
+				return self.__incomm_prov.generate_problem()
 
 
 	def check_new_problem(self, step_nr):
 		return self.__new_problem_check(step_nr)
 
 	def __new_problem_check(self, step_nr):
-		return step_nr % self.problemTick == 1
+		return step_nr % self.__problemTick == 1
 
 	def __create_initial_problem(self):
-		return self.__gen.generate_problem()
+		return self.__start_prov.generate_problem()
 
 class PredictedProblemGenerator(object):
 
-	def __init__(self):
-		self.predefined_jobs = [
-			Job(1, [Task(0,2), Task(1,3)]),
-			Job(2, [Task(0,1), Task(1,2), Task(2,3)]),
-			Job(3, [Task(0,2), Task(1,1), Task(2,3)]),
-			Job(4, [Task(0,3), Task(1,1), Task(2,2)]),
-			Job(5, [Task(0,2), Task(1,3), Task(2,2)]),
-			Job(6, [Task(0,4), Task(1,1), Task(2,2)]),
-			Job(7, [Task(0,4), Task(1,1), Task(2,2), Task(3,1)]),
-			Job(8, [Task(0,2), Task(1,2), Task(2,2), Task(3,1)]),
-			Job(9, [Task(0,3), Task(1,3)]),
-			Job(10, [Task(0,2), Task(0,5)]),
-		]
+	def __init__(self, predcited_problems_provider, problems_to_predict_nr):
+		self.__pred_prov = predcited_problems_provider
+		self.__to_pred_nr = problems_to_predict_nr
 
 	def get_predicted_problems(self):
-		problems = []
-		for job in self.predefined_jobs:
-			problems.append(Problem([copy.deepcopy(job)]))
-		return problems
+		return [self.__pred_prov.generate_problem() for _ in xrange(self.__to_pred_nr)]
 
 
 
-class NewProblemGenerator(object):
+class RandomizedProblemProvider(object):
 
 	def __init__(self, machines_number, jobs_number, job_duration_distrib, tasks_number_distrib, tasks_provider, seed=None):
 		self.__machines_nr = machines_number
@@ -105,9 +85,9 @@ class NewProblemGenerator(object):
 		self.__jobs_distrib.init_random(random)
 
 	def generate_problem(self):
-		return Problem([self.__generate_job() for _ in xrange(self.__jobs_nr)])
+		return Problem([self.__start_proverate_job() for _ in xrange(self.__jobs_nr)])
 
-	def __generate_job(self):
+	def __start_proverate_job(self):
 		job_duration = self.__jobs_distrib.next()
 		tasks_number = self.__tasks_distrib.next()
 		tasks = self.__tasks_provider.provide(job_duration=job_duration, tasks_number=tasks_number)
@@ -115,7 +95,7 @@ class NewProblemGenerator(object):
 		self.__counter += 1
 		return new_job
 
-class TasksProvider(object):
+class RandomizedTasksProvider(object):
 
 	def __init__(self, machines_number):
 		self.__machines_nr = machines_number

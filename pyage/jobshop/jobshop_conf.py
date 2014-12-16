@@ -12,8 +12,7 @@ from pyage.core.stop_condition import StepLimitStopCondition
 from pyage.jobshop.problem import  Problem
 from pyage.jobshop.adjuster import  Adjuster
 from pyage.jobshop.machine import  Machine
-from pyage.jobshop.presolver import  Presolver
-from pyage.jobshop.problemGenerator import  ProblemGenerator
+from pyage.jobshop.problemGenerator import  ProblemGenerator, UniformIntDistribution, RandomizedTasksProvider, PredictedProblemGenerator, RandomizedProblemProvider
 from pyage.jobshop.dummyStats import DummyStats
 from pyage.core.statistics import  GanttGenerator
 from pyage.core.statistics import  GanttStatistics
@@ -22,13 +21,27 @@ logger = logging.getLogger(__name__)
 
 agents_count = 1
 jobshop_agents = 10
+machines_number = 4
 logger.debug("AGGREGATE, %s agents", agents_count)
 
-#problem = Problem() 
-adjuster = Adjuster()
-#machine = Machine()
-presolver= Presolver()
-problemGenerator = lambda: ProblemGenerator(50)
+start_problem_provider = RandomizedProblemProvider(
+				machines_number = machines_number,
+				jobs_number = 5,
+				job_duration_distrib = UniformIntDistribution(7,10),
+				tasks_number_distrib = UniformIntDistribution(2,3),
+				tasks_provider = RandomizedTasksProvider(machines_number)
+			)
+predicted_problem_provider = RandomizedProblemProvider(
+				machines_number = machines_number,
+				jobs_number = 1,
+				job_duration_distrib = UniformIntDistribution(5,5),
+				tasks_number_distrib = UniformIntDistribution(1,3),
+				tasks_provider = RandomizedTasksProvider(machines_number)
+			)
+
+problemGenerator = lambda: ProblemGenerator(50, start_problem_provider, predicted_problem_provider)
+
+predictedProblemGenerator = lambda: PredictedProblemGenerator(predicted_problem_provider, jobshop_agents)
 
 agents = masters_factory(agents_count)
 slaves = slaves_factory(jobshop_agents)
