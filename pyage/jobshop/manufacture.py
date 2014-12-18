@@ -34,12 +34,14 @@ class Manufacture(object):
             if machine.taskEndTime <= time:
                 logger.debug("Updating machine: %d", machine.idd)
                 try:
-                    current_job = self.solution.get_machine_job(machine.idd)[0]
-                    del self.solution.get_machine_job(machine.idd)[0]
-                    task = current_job.get_task_for_machine(machine.idd)
+                    #current_job = self.solution.get_machine_job(machine.idd)[0]
+                    #del self.solution.get_machine_job(machine.idd)[0]
+                    task = self.solution.get_head_task(machine.idd)
+                    #del task
+                    self.solution.remove_first_task(machine.idd)
                     machine.taskEndTime = time+task.get_duration()
                     logger.debug("New endtime: %d", machine.taskEndTime)
-                    self.history.append([ machine.idd, current_job.get_jid(), time, task.get_duration(), 'Tick ' + str(time) ])
+                    self.history.append([ machine.idd, task.get_task_job().get_jid(), time, task.get_duration(), 'Tick ' + str(time) ])
                 except IndexError:
                     logger.debug("Nothing to add")
 
@@ -48,16 +50,22 @@ class Manufacture(object):
 
     def get_solution_part_as_problem(self, reverse_depth):
         logger.debug("Taking part as problem")
+        logger.info("Existing solution:\n%s", self.solution)
+        #print(self.solution)
         tasks_to_leave = 1
         tasks_list = []
         for depth in xrange(reverse_depth):
             for machine in self.machines:
-                machine_jobs = self.solution.get_machine_job(machine.idd)
-                if len(machine_jobs) < reverse_depth + tasks_to_leave:
+                #machine_jobs = self.solution.get_machine_job(machine.idd)
+                machine_tasks = self.solution.get_tasks(machine.idd)
+                #if len(machine_jobs) < reverse_depth + tasks_to_leave:
+                if len(machine_tasks) < reverse_depth + tasks_to_leave:
                     continue
-                last_job = machine_jobs[-1]
-                tasks_list.append(last_job.get_task_for_machine(machine.idd))
-                self.solution.remove_job_from_machine(machine.idd, last_job)
+                #last_job = machine_jobs[-1]
+                #tasks_list.append(last_job.get_task_for_machine(machine.idd))
+                tasks_list.append(machine_tasks[-1])
+                #self.solution.remove_job_from_machine(machine.idd, last_job)
+                self.solution.remove_last_task(machine.idd)
         #creating problem from tasks_list
         jobs_categorized = dict([(t.job, []) for t in tasks_list])
         for task in tasks_list:

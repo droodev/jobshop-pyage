@@ -149,6 +149,7 @@ class SimpleSolver(object):
             machines.append(Machine(num))
         currentTime = 0
         lastTimeAdded = 0
+        #solution = Solution(self.machines_nr)
         solution = Solution(self.machines_nr)
         jobs_tasks = {}
         for job in jobList:
@@ -156,18 +157,20 @@ class SimpleSolver(object):
         
         while jobList:
             for job in jobList:
+                #logger.debug("JTL: %s", jobs_tasks[job.jid])
                 task = jobs_tasks[job.jid][0]
                 if currentTime >= machines[task.machine].taskEndTime and self.__notInProgress(job, machines, currentTime):
                     machines[task.machine].taskEndTime = currentTime + task.get_duration()
                     machines[task.machine].jobInProgress = job.get_jid()
                     lastTimeAdded = task.get_duration()
                     task.set_start_time(currentTime)
-                    solution.append_job_to_machine(task.machine, job)
+                    #solution.append_job_to_machine(task.machine, job)
+                    solution.append_task_to_machine(task.machine, task)
                     jobs_tasks[job.jid].remove(task)
                 if not jobs_tasks[job.jid]:
                     jobList.remove(job)
             currentTime += 1
-        solution.set_completion_time(currentTime-1+lastTimeAdded)
+        #solution.set_completion_time(currentTime-1+lastTimeAdded)
         return solution
 
     def __getPermutations(self, jobList):

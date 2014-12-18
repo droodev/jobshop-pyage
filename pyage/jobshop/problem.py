@@ -68,7 +68,7 @@ class Task(object):
 		self.duration = duration
 
 	def __str__(self):
-		return "Task at machine: " + str(self.machine) + " lasting: " + str(self.duration) 
+		return "Task of job: " + str(self.job.jid) +" at machine: " + str(self.machine) + " lasting: " + str(self.duration) 
 
 	def get_duration(self):
 		return self.duration
@@ -86,34 +86,50 @@ class Task(object):
 		return self.machine == other.machine and self.duration == other.duration
 
 class Solution(object):
+
 	def __init__(self, machines_nr):
-		self.machines = [[] for _ in xrange(machines_nr)]
-		self.completion_time = 0
-		self.machines_nr = machines_nr
+		self.__machines_nr = machines_nr
+		self.__machines_end_times = {}
+		self.__machines_tasks = {}
+		self.__initialize_machines_dicts(machines_nr)
 
-	def append_job_to_machine(self, machine_nr, job):
-		self.machines[machine_nr].append(job)
+	def __initialize_machines_dicts(self, machines_nr):
+		for i in xrange(machines_nr):
+			self.__machines_tasks[i] = []
+			self.__machines_end_times[i] = 0
 
-	def remove_job_from_machine(self,machine_nr, job):
-		self.machines[machine_nr].remove(job)
 
-	def set_completion_time(self, completion_time):
-		self.completion_time = completion_time
+	#TODO task has machine number in
+	def append_task_to_machine(self, machines_nr, task):
+		self.__machines_tasks[machines_nr].append(task)
+		self.__machines_end_times[machines_nr] += task.get_duration()
+		
 
 	def get_completion_time(self):
-		return self.completion_time
+		return max(self.__machines_end_times.values())
 
-	def get_machine_job(self, machine_nr):
-		return self.machines[machine_nr]
+	#TODO maybe pop-variant
+	def get_head_task(self, machine_number):
+		return self.__machines_tasks[machine_number][0]
+
+	def get_tasks(self, machine_number):
+		return self.__machines_tasks[machine_number]
+
+	def remove_last_task(self, machine_number):
+		self.__machines_tasks[machine_number].remove(self.__machines_tasks[machine_number][-1])
+
+	def remove_first_task(self, machine_number):
+		self.__machines_tasks[machine_number].remove(self.__machines_tasks[machine_number][0])
+
 
 	def __str__(self):
 		machine_strings_list = []
-		for m_nr in xrange(self.machines_nr):
+		for m_nr in xrange(self.__machines_nr):
 			machine_string = "MACHINE " + str(m_nr) + ":"
-			jobs_string = "\n\t".join(map(lambda x: x.str_of_job_name(),self.machines[m_nr]))
+			jobs_string = "\n\t".join(map(str,self.__machines_tasks[m_nr]))
 			jobs_string = "\n\t" + jobs_string
 			machine_strings_list.append(machine_string+jobs_string)
-		machine_strings_list = ["Completion time: " + str(self.completion_time)] + machine_strings_list
+		machine_strings_list = ["Completion time: " + str(self.get_completion_time())] + machine_strings_list
 		return "\n".join(machine_strings_list)
 
 class JobShopGenotype(object):
