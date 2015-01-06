@@ -112,7 +112,7 @@ class SlaveAgent(object):
         return self.solver.get_solution()
 
     def check_predicated_problem(self, checked_problem):
-        if checked_problem == self.predicted_problem:
+        if checked_problem.represents_same(self.predicted_problem):
             logger.debug("%d Checked: %s\n",self.aid, checked_problem)
             logger.debug("%d predicted: %s\n",self.aid, self.predicted_problem)
             return True
@@ -154,22 +154,27 @@ class SimpleSolver(object):
         jobs_tasks = {}
         for job in jobList:
             jobs_tasks[job.jid] = list(copy.deepcopy(job.get_tasks_list()))
-        
-        while jobList:
-            for job in jobList:
-                #logger.debug("JTL: %s", jobs_tasks[job.jid])
-                task = jobs_tasks[job.jid][0]
-                if currentTime >= machines[task.machine].taskEndTime and self.__notInProgress(job, machines, currentTime):
-                    machines[task.machine].taskEndTime = currentTime + task.get_duration()
-                    machines[task.machine].jobInProgress = job.get_jid()
-                    lastTimeAdded = task.get_duration()
-                    task.set_start_time(currentTime)
-                    #solution.append_job_to_machine(task.machine, job)
-                    solution.append_task_to_machine(task.machine, task)
-                    jobs_tasks[job.jid].remove(task)
-                if not jobs_tasks[job.jid]:
-                    jobList.remove(job)
-            currentTime += 1
+        try:
+            while jobList:
+                for job in jobList:
+                    task = jobs_tasks[job.jid][0]
+
+                    if currentTime >= machines[task.machine].taskEndTime and self.__notInProgress(job, machines, currentTime):
+                        machines[task.machine].taskEndTime = currentTime + task.get_duration()
+                        machines[task.machine].jobInProgress = job
+
+                        lastTimeAdded = task.get_duration()
+                        task.set_start_time(currentTime)
+                        #solution.append_job_to_machine(task.machine, job)
+                        solution.append_task_to_machine(task.machine, task)
+                        jobs_tasks[job.jid].remove(task)
+                    if not jobs_tasks[job.jid]:
+                        jobList.remove(job)
+                currentTime += 1
+        except Exception as e:
+            logger.debug("ECEPTION %s", e)
+            logger.debug(jobList)
+            raise e
         #solution.set_completion_time(currentTime-1+lastTimeAdded)
         return solution
 
@@ -179,7 +184,7 @@ class SimpleSolver(object):
     '''wymogi JobShop - jeden job moze naraz isc tylko na jednej maszynie'''
     def __notInProgress(self, job, machines, currentTime):
         for x in machines:
-            if currentTime < x.taskEndTime and x.jobInProgress == job.get_jid():
+            if currentTime < x.taskEndTime and x.jobInProgress == job:
                 return False
         return True
 

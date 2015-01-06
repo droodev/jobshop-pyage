@@ -22,7 +22,7 @@ jobshop_agents = 10
 machines_number = 4
 logger.debug("AGGREGATE, %s agents", agents_count)
 
-#seed = 120032
+seed = 1200999
 
 start_problem_provider = RandomizedProblemProvider(
 				machines_number = machines_number,
@@ -30,7 +30,7 @@ start_problem_provider = RandomizedProblemProvider(
 				job_duration_distrib = UniformIntDistribution(7,10),
 				tasks_number_distrib = UniformIntDistribution(2,3),
 				tasks_provider = RandomizedTasksProvider(machines_number)
-				#,seed = seed
+				,seed = seed
 			)
 predicted_problem_provider = RandomizedProblemProvider(
 				machines_number = machines_number,
@@ -38,7 +38,7 @@ predicted_problem_provider = RandomizedProblemProvider(
 				job_duration_distrib = UniformIntDistribution(5,5),
 				tasks_number_distrib = UniformIntDistribution(1,3),
 				tasks_provider = RandomizedTasksProvider(machines_number)
-				#,seed = seed
+				,seed = seed
 			)
 
 problemGenerator = lambda: ProblemGenerator(50, start_problem_provider, predicted_problem_provider)

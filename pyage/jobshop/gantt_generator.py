@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 class GanttGenerator(object):
     __tasks = {}
-    __colors = "bgrcmykw"
+    __colors = "bgrcmyk"
     __N = 50
 
     def __init__(self, n_machines=None, out_dir='gantt'):

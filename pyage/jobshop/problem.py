@@ -1,6 +1,10 @@
 import copy
 from pyage.jobshop.machine import Machine
 from pyage.core.operator import Operator
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Problem(object):
     def __init__(self, jobs_list):
@@ -19,14 +23,18 @@ class Problem(object):
 
     def merge_with(self, prob):
     	new_jobs_list = self.get_jobs_list() + prob.get_jobs_list()
-    	counter = 0
-    	for job in new_jobs_list:
-    		job.jid = counter
-    		counter +=1
     	return Problem(new_jobs_list)
 
     def __eq__(self, other):
     	return self.jobs_list == other.jobs_list
+
+    def represents_same(self, other):
+    	for job in self.get_jobs_list():
+    		for other_job in other.get_jobs_list():
+    			if other_job.represents_same(job):
+    				break
+    			return False
+    	return True
 
 
 class Job(object):
@@ -38,7 +46,7 @@ class Job(object):
 
 	def __str__(self):
 		caption = self.str_of_job_name()
-		joined = "\n\t".join(map(str,self.tasks_list))
+		joined = "\n\t".join(map(lambda x: x.get_str_without_jobnr(),self.tasks_list))
 		return caption + "\n\t" + joined
 
 	def str_of_job_name(self):
@@ -60,6 +68,10 @@ class Job(object):
 		raise Exception()
 
 	def __eq__(self, other):
+		#return self.tasks_list == other.tasks_list
+		return self.jid == other.jid
+
+	def represents_same(self, other):
 		return self.tasks_list == other.tasks_list
 
 class Task(object):
@@ -69,6 +81,10 @@ class Task(object):
 
 	def __str__(self):
 		return "Task of job: " + str(self.job.jid) +" at machine: " + str(self.machine) + " lasting: " + str(self.duration) 
+
+	def get_str_without_jobnr(self):
+		return "Task at machine: " + str(self.machine) + " lasting: " + str(self.duration) 
+
 
 	def get_duration(self):
 		return self.duration
@@ -116,7 +132,7 @@ class Solution(object):
 		return self.__machines_tasks[machine_number]
 
 	def remove_last_task(self, machine_number):
-		self.__machines_tasks[machine_number].remove(self.__machines_tasks[machine_number][-1])
+		self.__machines_tasks[machine_number]=self.__machines_tasks[machine_number][:-1]
 
 	def remove_first_task(self, machine_number):
 		self.__machines_tasks[machine_number].remove(self.__machines_tasks[machine_number][0])

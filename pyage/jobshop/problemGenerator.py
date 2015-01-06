@@ -3,6 +3,15 @@ import copy
 import random
 from time import time
 
+class Counter(object):
+	def __init__(self):
+		self.counter = 100
+	def get_next(self):
+		self.counter += 1
+		return self.counter-1
+
+c_obj = Counter()
+
 class Randomized(object):
 
 	def init_random(self, random_obj):
@@ -75,7 +84,6 @@ class RandomizedProblemProvider(object):
 		self.__jobs_distrib = job_duration_distrib
 		self.__tasks_distrib = tasks_number_distrib
 		self.__tasks_provider = tasks_provider
-		self.__counter = 0
 		random.seed(seed)
 		self.__init_randoms()
 
@@ -91,8 +99,7 @@ class RandomizedProblemProvider(object):
 		job_duration = self.__jobs_distrib.next()
 		tasks_number = self.__tasks_distrib.next()
 		tasks = self.__tasks_provider.provide(job_duration=job_duration, tasks_number=tasks_number)
-		new_job = Job(self.__counter, tasks)
-		self.__counter += 1
+		new_job = Job(c_obj.get_next(), tasks)
 		return new_job
 
 class RandomizedTasksProvider(object):

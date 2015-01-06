@@ -18,6 +18,7 @@ class Manufacture(object):
         self.time = -1
 
     def assign_tasks(self, solution):
+        #TODO Very urgent - assigning next tasks WITHOUT deleting previous
         logger.debug("Manufacture solution assigned: \n%s", solution)
         self.solution = copy.deepcopy(solution)
 
@@ -67,15 +68,14 @@ class Manufacture(object):
                 #self.solution.remove_job_from_machine(machine.idd, last_job)
                 self.solution.remove_last_task(machine.idd)
         #creating problem from tasks_list
+        logger.debug("Taken tasks:\n %s", map(str,tasks_list))
         jobs_categorized = dict([(t.job, []) for t in tasks_list])
         for task in tasks_list:
             jobs_categorized[task.job].append(task)
 
-        counter = 0
         jobs_lists = []
-        for tlist in jobs_categorized.values():
-            jobs_lists.append(Job(counter, tlist))
-            counter +=1
+        for job, tlist in jobs_categorized.items():
+            jobs_lists.append(Job(job.get_jid(), tlist))
 
-        logger.debug("left solution: \n%s", self.solution)
+        logger.debug("Left solution: \n%s", self.solution)
         return Problem(jobs_lists)
