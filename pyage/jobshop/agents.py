@@ -31,7 +31,7 @@ class MasterAgent(object):
         return self.__manufacture.get_history()
 
     def step(self):
-        self.__timeKeeper.step(self.steps)
+        self.__timeKeeper.step()
         if (not self.assigned) and (self.__timeKeeper.get_time() == 0):
             self.__manufacture.assign_tasks(self.get_solution())
             self.assigned = True
@@ -41,11 +41,10 @@ class MasterAgent(object):
             new_problem = self._MasterAgent__problemGenerator.step(self.steps)
             self.problem = new_problem
             logger.debug("New problem came: \n%s", new_problem)
-            if(self.steps == 1):
-                for agent in self.__slaves.values():
+            for agent in self.__slaves.values():
+                if(self.steps == 1):
                     agent.append_problem(new_problem, None)
-            else:
-                for agent in self.__slaves.values():
+                else:
                     if agent.check_predicated_problem(new_problem):
                         logger.debug("Agent with good pred_problem")
                         new_solution = agent.get_solution()

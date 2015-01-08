@@ -1,11 +1,13 @@
 class TimeKeeper(object):
 	def __init__(self, resolution, init_time):
-		self.time = init_time
-		self.resolution = resolution
+		self.__time = init_time
+		self.__resolution = resolution
+		self.__steps = 0
 
-	def step(self, step):
-		if step % self.resolution == 0:
-			self.time += 1
+	def step(self):
+		self.__steps += 1
+		if self.__steps % self.__resolution == 0:
+			self.__time += 1
 
 	def get_time(self):
-		return self.time
+		return self.__time
