@@ -137,6 +137,19 @@ class Solution(object):
 	def remove_first_task(self, machine_number):
 		self.__machines_tasks[machine_number].remove(self.__machines_tasks[machine_number][0])
 
+	def append_clone_more_solution_part(self, new_solution):
+		raw_tasks = []
+		for m_nr in xrange(self.__machines_nr):
+			old_tasks = self.get_tasks(m_nr)
+			new_tasks = new_solution.get_tasks(m_nr)
+			raw_tasks.append(copy.deepcopy(old_tasks+new_tasks))
+		new_solution = Solution(self.__machines_nr)
+		for m_nr in xrange(self.__machines_nr):
+			for task in raw_tasks[m_nr]:
+				new_solution.append_task_to_machine(m_nr, task)
+
+		return new_solution
+
 
 	def __str__(self):
 		machine_strings_list = []

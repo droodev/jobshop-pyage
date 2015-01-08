@@ -2,7 +2,7 @@ import logging
 import copy
 
 from machine import Machine
-from problem import Job, Problem
+from problem import Job, Problem, Solution
 
 
 logger = logging.getLogger(__name__)
@@ -18,9 +18,12 @@ class Manufacture(object):
         self.time = -1
 
     def assign_tasks(self, solution):
-        #TODO Very urgent - assigning next tasks WITHOUT deleting previous
-        logger.debug("Manufacture solution assigned: \n%s", solution)
-        self.solution = copy.deepcopy(solution)
+        logger.debug("Manufacture solution assigned: \n%s", solution)        
+        if 'solution' not in self.__dict__.keys():
+            self.solution = Solution(self.machines_nr)
+        new_sol = self.solution.append_clone_more_solution_part(solution)
+        self.solution = new_sol
+        
 
 
     def time_tick(self, new_time):
@@ -69,13 +72,16 @@ class Manufacture(object):
                 self.solution.remove_last_task(machine.idd)
         #creating problem from tasks_list
         logger.debug("Taken tasks:\n %s", map(str,tasks_list))
-        jobs_categorized = dict([(t.job, []) for t in tasks_list])
+        jobs_categorized = dict([(t.job.jid, []) for t in tasks_list])
         for task in tasks_list:
-            jobs_categorized[task.job].append(task)
+            jobs_categorized[task.job.jid].append(task)
 
         jobs_lists = []
-        for job, tlist in jobs_categorized.items():
-            jobs_lists.append(Job(job.get_jid(), tlist))
+        for jid, tlist in jobs_categorized.items():
+            jobs_lists.append(Job(jid, tlist))
+
+
 
         logger.debug("Left solution: \n%s", self.solution)
+        #logger.debug("New JOBS: \n%s", map(str,jobs_lists))
         return Problem(jobs_lists)

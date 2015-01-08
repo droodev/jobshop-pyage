@@ -96,7 +96,7 @@ class SlaveAgent(object):
         self.aid = aid
 
     def append_problem(self, problem, predicted_problem):
-        logger.debug("%d New problem for slave appended: \n%s\n with predicted\n %s ", self.aid, problem, predicted_problem)
+        #logger.debug("%d New problem for slave appended: \n%s\n with predicted\n %s ", self.aid, problem, predicted_problem)
         self.solver = SimpleSolver(4, problem)
         self.predicted_problem = predicted_problem
 
@@ -145,6 +145,7 @@ class SimpleSolver(object):
     '''zwraca liste [czas-rozwiazania, rozwiazanie]  '''
     def __solveStuff(self, jobList):
         machines = []
+        #logger.debug("SOLVING: %s", jobList)
         for num in xrange(self.machines_nr):
             machines.append(Machine(num))
         currentTime = 0
@@ -154,27 +155,29 @@ class SimpleSolver(object):
         jobs_tasks = {}
         for job in jobList:
             jobs_tasks[job.jid] = list(copy.deepcopy(job.get_tasks_list()))
-        try:
-            while jobList:
-                for job in jobList:
-                    task = jobs_tasks[job.jid][0]
+    #    try:
+        while jobList:
+            for job in jobList:
+                #logger.debug("BEFORE TAKING: %s->%s", job.jid,jobs_tasks[job.jid])
+                task = jobs_tasks[job.jid][0]
 
-                    if currentTime >= machines[task.machine].taskEndTime and self.__notInProgress(job, machines, currentTime):
-                        machines[task.machine].taskEndTime = currentTime + task.get_duration()
-                        machines[task.machine].jobInProgress = job
+                if currentTime >= machines[task.machine].taskEndTime and self.__notInProgress(job, machines, currentTime):
+                    machines[task.machine].taskEndTime = currentTime + task.get_duration()
+                    machines[task.machine].jobInProgress = job
+                    lastTimeAdded = task.get_duration()
+                    task.set_start_time(currentTime)
+                    solution.append_task_to_machine(task.machine, task)
+                    jobs_tasks[job.jid].remove(task)
 
-                        lastTimeAdded = task.get_duration()
-                        task.set_start_time(currentTime)
-                        #solution.append_job_to_machine(task.machine, job)
-                        solution.append_task_to_machine(task.machine, task)
-                        jobs_tasks[job.jid].remove(task)
-                    if not jobs_tasks[job.jid]:
-                        jobList.remove(job)
-                currentTime += 1
-        except Exception as e:
-            logger.debug("ECEPTION %s", e)
-            logger.debug(jobList)
-            raise e
+                #logger.debug("CHECKING EMPTY: %s", job.jid)
+
+                if not jobs_tasks[job.jid]:
+                    jobList.remove(job)
+            currentTime += 1
+    #except Exception as e:
+    #    logger.debug("EXCEPTION %s", e)
+    #    logger.debug(jobList)
+    #    raise e
         #solution.set_completion_time(currentTime-1+lastTimeAdded)
         return solution
 
