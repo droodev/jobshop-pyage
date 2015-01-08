@@ -166,7 +166,7 @@ class SimpleSolver(object):
                     machines[task.machine].jobInProgress = job
                     lastTimeAdded = task.get_duration()
                     task.set_start_time(currentTime)
-                    solution.append_task_to_machine(task.machine, task)
+                    solution.append_task_to_machine(task)
                     jobs_tasks[job.jid].remove(task)
 
                 #logger.debug("CHECKING EMPTY: %s", job.jid)

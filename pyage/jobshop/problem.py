@@ -114,13 +114,11 @@ class Solution(object):
 			self.__machines_tasks[i] = []
 			self.__machines_end_times[i] = 0
 
-
-	#TODO task has machine number in
-	def append_task_to_machine(self, machines_nr, task):
-		self.__machines_tasks[machines_nr].append(task)
-		self.__machines_end_times[machines_nr] += task.get_duration()
+	def append_task_to_machine(self, task):
+		machine_nr = task.get_task_machine()
+		self.__machines_tasks[machine_nr].append(task)
+		self.__machines_end_times[machine_nr] += task.get_duration()
 		
-
 	def get_completion_time(self):
 		return max(self.__machines_end_times.values())
 
@@ -146,7 +144,7 @@ class Solution(object):
 		new_solution = Solution(self.__machines_nr)
 		for m_nr in xrange(self.__machines_nr):
 			for task in raw_tasks[m_nr]:
-				new_solution.append_task_to_machine(m_nr, task)
+				new_solution.append_task_to_machine(task)
 
 		return new_solution
 
@@ -161,6 +159,10 @@ class Solution(object):
 		machine_strings_list = ["Completion time: " + str(self.get_completion_time())] + machine_strings_list
 		return "\n".join(machine_strings_list)
 
+
+#################################################################
+#			CLASSES OF GENETIC ALGORITHM APPROACH				#
+#################################################################
 class JobShopGenotype(object):
     ''' uporzadkowana lista [Jobnumber, Jobnumber, Jobnumber,...] o dlugosci rownej ilosci taskow
         n-te wystapienie danego numeru joba oznacza zakolejkowanie w danej chwili n-tego taska tego joba'''
