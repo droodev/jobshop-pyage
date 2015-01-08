@@ -1,7 +1,6 @@
 import logging
 import copy
 
-from machine import Machine
 from problem import Job, Problem, Solution
 
 logger = logging.getLogger(__name__)
@@ -68,3 +67,10 @@ class Manufacture(object):
         logger.debug("Left solution: \n%s", self.solution)
         #logger.debug("New JOBS: \n%s", map(str,jobs_lists))
         return Problem(jobs_lists)
+
+class Machine(object):
+
+    def __init__(self, idd):
+        self.idd = idd
+        self.taskEndTime = 0
+        self.jobInProgress = None

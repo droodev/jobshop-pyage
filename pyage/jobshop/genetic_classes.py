@@ -7,7 +7,6 @@ Created on Dec 3, 2014
 from random import randrange
 from pyage.core.operator import Operator
 import copy
-from pyage.jobshop.machine import Machine
 from pyage.solutions.evolution.mutation import AbstractMutation
 from pyage.solutions.evolution.crossover import AbstractCrossover
 from pyage.jobshop.problem import Solution
@@ -39,6 +38,7 @@ class BasicJobShopEvaluation(Operator):
     def schedule(self,genes):
         machines = []
         for num in xrange(self.machines_nr):
+            #Machine not imported, class won't be used in the same shape in future versions probably
             machines.append(Machine(num))
         currentTime = 0
         lastTimeAdded = 0

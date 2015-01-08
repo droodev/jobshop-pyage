@@ -11,7 +11,6 @@ from pyage.core.migration import Pyro4Migration
 from pyage.core.stop_condition import StepLimitStopCondition
 from pyage.jobshop.problem import  Problem
 from pyage.jobshop.adjuster import  Adjuster
-from pyage.jobshop.machine import  Machine
 from pyage.jobshop.problemGenerator import  ProblemGenerator, UniformIntDistribution, RandomizedTasksProvider, PredictedProblemGenerator, RandomizedProblemProvider
 from pyage.jobshop.statistics import  GanttStatistics
 from pyage.jobshop.timeKeeper import TimeKeeper

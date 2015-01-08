@@ -1,5 +1,4 @@
 import copy
-from pyage.jobshop.machine import Machine
 from pyage.core.operator import Operator
 import logging
 
@@ -159,60 +158,3 @@ class Solution(object):
 			machine_strings_list.append(machine_string+jobs_string)
 		machine_strings_list = ["Completion time: " + str(self.get_completion_time())] + machine_strings_list
 		return "\n".join(machine_strings_list)
-
-
-#################################################################
-#			CLASSES OF GENETIC ALGORITHM APPROACH				#
-#################################################################
-class JobShopGenotype(object):
-    ''' uporzadkowana lista [Jobnumber, Jobnumber, Jobnumber,...] o dlugosci rownej ilosci taskow
-        n-te wystapienie danego numeru joba oznacza zakolejkowanie w danej chwili n-tego taska tego joba'''
-    def __init__(self, joblist):
-        self.genes = joblist
-        self.fitness = None
-        
-class BasicJobShopEvaluation(Operator):
-    
-    def __init__(self,machines_nr):
-        super(BasicJobShopEvaluation, self).__init__(JobShopGenotype)
-        self.machines_nr = machines_nr
-        
-    
-    def process(self, population):
-        for genotype in population:
-            genotype.fitness = self.__schedule(genotype.genes)
-        
-    def __schedule(self,genes):
-        machines = []
-        for num in xrange(self.machines_nr):
-            machines.append(Machine(num))
-        currentTime = 0
-        lastTimeAdded = 0
-        jobs_tasks = {}
-        jobList = list(copy.deepcopy(genes))
-        for job in jobList:
-            jobs_tasks[job.jid] = job.get_tasks_list()
-        
-        while jobList:
-            for job in jobList:
-                task = jobs_tasks[job.jid][0]
-                if currentTime >= machines[task.machine].taskEndTime and self.__notInProgress(job, machines, currentTime):
-                    machines[task.machine].taskEndTime = currentTime + task.get_duration()
-                    machines[task.machine].jobInProgress = job.get_jid()
-                    lastTimeAdded = task.get_duration()
-                    task.set_start_time(currentTime)
-                    jobs_tasks[job.jid].remove(task)
-                if not jobs_tasks[job.jid]:
-                    jobList.remove(job)
-            currentTime += 1
-        return currentTime-1+lastTimeAdded
-            
-    def __notInProgress(self, job, machines, currentTime):
-        for x in machines:
-            if currentTime < x.taskEndTime and x.jobInProgress == job.get_jid():
-                return False
-        return True
-class BasicJobShopMutation(Operator):
-    
-    def __init__(self,probability=0.1):
-        super(BasicJobShopMutation, self).__init__(JobShopGenotype, probability)

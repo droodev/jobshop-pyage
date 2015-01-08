@@ -3,7 +3,6 @@ import itertools
 import copy
 
 from pyage.core.inject import Inject
-from machine import Machine
 from problem import Solution
 from manufacture import Manufacture
 from timeKeeper import TimeKeeper
@@ -139,13 +138,10 @@ class SimpleSolver(object):
 
     '''zwraca liste [czas-rozwiazania, rozwiazanie]  '''
     def __solveStuff(self, jobList):
-        machines = []
-        #logger.debug("SOLVING: %s", jobList)
-        for num in xrange(self.machines_nr):
-            machines.append(Machine(num))
+        ending_times = [0 for _ in xrange(self.machines_nr)]
+        jobs_in_progress = [None for _ in xrange(self.machines_nr)]
         currentTime = 0
         lastTimeAdded = 0
-        #solution = Solution(self.machines_nr)
         solution = Solution(self.machines_nr)
         jobs_tasks = {}
         for job in jobList:
@@ -153,9 +149,9 @@ class SimpleSolver(object):
         while jobList:
             for job in jobList:
                 task = jobs_tasks[job.jid][0]
-                if currentTime >= machines[task.machine].taskEndTime and self.__notInProgress(job, machines, currentTime):
-                    machines[task.machine].taskEndTime = currentTime + task.get_duration()
-                    machines[task.machine].jobInProgress = job
+                if currentTime >= ending_times[task.machine] and self.__notInProgress(job, ending_times, jobs_in_progress, currentTime):
+                    ending_times[task.machine] = currentTime + task.get_duration()
+                    jobs_in_progress[task.machine] = job
                     lastTimeAdded = task.get_duration()
                     task.set_start_time(currentTime)
                     solution.append_task_to_machine(task)
@@ -169,9 +165,9 @@ class SimpleSolver(object):
         return itertools.permutations(jobList,len(jobList))
 
     '''wymogi JobShop - jeden job moze naraz isc tylko na jednej maszynie'''
-    def __notInProgress(self, job, machines, currentTime):
-        for x in machines:
-            if currentTime < x.taskEndTime and x.jobInProgress == job:
+    def __notInProgress(self, job, ending_times, jobs_in_progress, currentTime):
+        for i in xrange(len(jobs_in_progress)):
+            if currentTime < ending_times[i] and job.jid == jobs_in_progress[i].jid:
                 return False
         return True
 
