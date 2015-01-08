@@ -15,6 +15,7 @@ from pyage.jobshop.machine import  Machine
 from pyage.jobshop.problemGenerator import  ProblemGenerator, UniformIntDistribution, RandomizedTasksProvider, PredictedProblemGenerator, RandomizedProblemProvider
 from pyage.jobshop.statistics import  GanttStatistics
 from pyage.jobshop.timeKeeper import TimeKeeper
+from pyage.jobshop.manufacture import Manufacture
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ logger.debug("AGGREGATE, %s agents", agents_count)
 seed = 1200999
 
 timeKeeper = lambda: TimeKeeper(5,-1)
-
+manufacture = lambda: Manufacture(machines_number)
 
 start_problem_provider = RandomizedProblemProvider(
 				machines_number = machines_number,

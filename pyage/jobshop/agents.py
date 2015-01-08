@@ -17,6 +17,7 @@ class MasterAgent(object):
     @Inject("problemGenerator:_MasterAgent__problemGenerator")
     @Inject("predictedProblemGenerator:_MasterAgent__predictor")
     @Inject("timeKeeper:_MasterAgent__timeKeeper")
+    @Inject("manufacture:_MasterAgent__manufacture")
     def __init__(self, name=None):
         self.name = name
         super(MasterAgent, self).__init__()
@@ -24,22 +25,21 @@ class MasterAgent(object):
             agent.parent = self
         logger.debug("Slaves number: %d", len(self.__slaves.values()))
         self.steps = 1
-        self.manufacture = Manufacture(4)
         self.problem = None
         self.assigned = False
 
     def get_history(self):
-        return self.manufacture.get_history()
+        return self.__manufacture.get_history()
 
     def step(self):
         self.__timeKeeper.step(self.steps)
         if (not self.assigned) and (self.__timeKeeper.get_time() == 0):
-            self.manufacture.assign_tasks(self.get_solution())
+            self.__manufacture.assign_tasks(self.get_solution())
             self.assigned = True
             self.__assign_predicted_and_solution_part()
 
 
-        self.manufacture.time_tick(self.__timeKeeper.get_time())
+        self.__manufacture.time_tick(self.__timeKeeper.get_time())
 
         if self._MasterAgent__problemGenerator.check_new_problem(self.steps):
             new_problem = self._MasterAgent__problemGenerator.step(self.steps)
@@ -54,7 +54,7 @@ class MasterAgent(object):
                         logger.debug("Agent with good pred_problem")
                         new_solution = agent.get_solution()
                         #logger.debug("Pretty new solution\n %s",new_solution)
-                        self.manufacture.assign_tasks(new_solution)
+                        self.__manufacture.assign_tasks(new_solution)
                         self.__assign_predicted_and_solution_part()
                         break
 
@@ -71,7 +71,7 @@ class MasterAgent(object):
         return merged_problems
 
     def __assign_predicted_and_solution_part(self):
-        solution_part_problem = self.manufacture.get_solution_part_as_problem(2)
+        solution_part_problem = self.__manufacture.get_solution_part_as_problem(2)
         merged_problems = self.__get_predicted_and_solution_problems(solution_part_problem)
         if len(self.__slaves) != len(merged_problems):
             raise Exception("Not equal: agents and predicted problems")
