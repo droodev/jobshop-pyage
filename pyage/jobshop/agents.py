@@ -8,7 +8,6 @@ from manufacture import Manufacture
 from timeKeeper import TimeKeeper
 from problemGenerator import PredictedProblemGenerator
 
-
 logger = logging.getLogger(__name__)
 
 class MasterAgent(object):
@@ -24,22 +23,18 @@ class MasterAgent(object):
             agent.parent = self
         logger.debug("Slaves number: %d", len(self.__slaves.values()))
         self.steps = 1
-        self.problem = None
-        self.assigned = False
 
     def get_history(self):
         return self.__manufacture.get_history()
 
     def step(self):
         self.__timeKeeper.step()
-        if (not self.assigned) and (self.__timeKeeper.get_time() == 0):
+        if (not self.__manufacture.tasks_assigned()) and (self.__timeKeeper.get_time() == 0):
             self.__manufacture.assign_tasks(self.get_solution())
-            self.assigned = True
             self.__assign_predicted_and_solution_part()
         self.__manufacture.time_tick(self.__timeKeeper.get_time())
         if self._MasterAgent__problemGenerator.check_new_problem(self.steps):
-            new_problem = self._MasterAgent__problemGenerator.step(self.steps)
-            self.problem = new_problem
+            new_problem = self.__problemGenerator.step(self.steps)
             logger.debug("New problem came: \n%s", new_problem)
             for agent in self.__slaves.values():
                 if(self.steps == 1):

@@ -11,12 +11,17 @@ class Manufacture(object):
         self.machines_nr = machines_nr
         self.machines = [Machine(i) for i in xrange(machines_nr)]
         self.time = -1
+        self.solution = None
+
+    def tasks_assigned(self):
+        return self.solution is not None
 
     def assign_tasks(self, solution):
         logger.debug("Manufacture solution assigned: \n%s", solution)        
-        if 'solution' not in self.__dict__.keys():
-            self.solution = Solution(self.machines_nr)
-        new_sol = self.solution.append_clone_more_solution_part(solution)
+        if self.solution is None:
+            new_sol = copy.deepcopy(solution)
+        else:
+            new_sol = self.solution.append_clone_more_solution_part(solution)
         self.solution = new_sol
         
     def time_tick(self, new_time):
