@@ -38,11 +38,7 @@ class Manufacture(object):
             if machine.taskEndTime <= time:
                 logger.debug("Updating machine: %d", machine.idd)
                 try:
-                    #current_job = self.solution.get_machine_job(machine.idd)[0]
-                    #del self.solution.get_machine_job(machine.idd)[0]
-                    task = self.solution.get_head_task(machine.idd)
-                    #del task
-                    self.solution.remove_first_task(machine.idd)
+                    task = self.solution.pop_head_task(machine.idd)
                     machine.taskEndTime = time+task.get_duration()
                     logger.debug("New endtime: %d", machine.taskEndTime)
                     self.history.append([ machine.idd, task.get_task_job().get_jid(), time, task.get_duration(), 'Tick ' + str(time) ])

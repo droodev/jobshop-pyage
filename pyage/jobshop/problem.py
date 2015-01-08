@@ -122,9 +122,10 @@ class Solution(object):
 	def get_completion_time(self):
 		return max(self.__machines_end_times.values())
 
-	#TODO maybe pop-variant
-	def get_head_task(self, machine_number):
-		return self.__machines_tasks[machine_number][0]
+	def pop_head_task(self, machine_number):
+		head_task = self.__machines_tasks[machine_number][0]
+		self.__remove_first_task(machine_number)
+		return head_task
 
 	def get_tasks(self, machine_number):
 		return self.__machines_tasks[machine_number]
@@ -132,7 +133,7 @@ class Solution(object):
 	def remove_last_task(self, machine_number):
 		self.__machines_tasks[machine_number]=self.__machines_tasks[machine_number][:-1]
 
-	def remove_first_task(self, machine_number):
+	def __remove_first_task(self, machine_number):
 		self.__machines_tasks[machine_number].remove(self.__machines_tasks[machine_number][0])
 
 	def append_clone_more_solution_part(self, new_solution):
