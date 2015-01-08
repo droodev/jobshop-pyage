@@ -16,6 +16,7 @@ class MasterAgent(object):
     @Inject("slaves:_MasterAgent__slaves")
     @Inject("problemGenerator:_MasterAgent__problemGenerator")
     @Inject("predictedProblemGenerator:_MasterAgent__predictor")
+    @Inject("timeKeeper:_MasterAgent__timeKeeper")
     def __init__(self, name=None):
         self.name = name
         super(MasterAgent, self).__init__()
@@ -24,7 +25,6 @@ class MasterAgent(object):
         logger.debug("Slaves number: %d", len(self.__slaves.values()))
         self.steps = 1
         self.manufacture = Manufacture(4)
-        self.timeKeeper = TimeKeeper(5,-1)
         self.problem = None
         self.assigned = False
 
@@ -32,14 +32,14 @@ class MasterAgent(object):
         return self.manufacture.get_history()
 
     def step(self):
-        self.timeKeeper.step(self.steps)
-        if (not self.assigned) and (self.timeKeeper.get_time() == 0):
+        self.__timeKeeper.step(self.steps)
+        if (not self.assigned) and (self.__timeKeeper.get_time() == 0):
             self.manufacture.assign_tasks(self.get_solution())
             self.assigned = True
             self.__assign_predicted_and_solution_part()
 
 
-        self.manufacture.time_tick(self.timeKeeper.get_time())
+        self.manufacture.time_tick(self.__timeKeeper.get_time())
 
         if self._MasterAgent__problemGenerator.check_new_problem(self.steps):
             new_problem = self._MasterAgent__problemGenerator.step(self.steps)
