@@ -37,10 +37,7 @@ class MasterAgent(object):
             self.__manufacture.assign_tasks(self.get_solution())
             self.assigned = True
             self.__assign_predicted_and_solution_part()
-
-
         self.__manufacture.time_tick(self.__timeKeeper.get_time())
-
         if self._MasterAgent__problemGenerator.check_new_problem(self.steps):
             new_problem = self._MasterAgent__problemGenerator.step(self.steps)
             self.problem = new_problem
@@ -57,10 +54,8 @@ class MasterAgent(object):
                         self.__manufacture.assign_tasks(new_solution)
                         self.__assign_predicted_and_solution_part()
                         break
-
         for agent in self.__slaves.values():
             agent.step()
-
         self.steps += 1
 
     def __get_predicted_and_solution_problems(self, solution_part_problem):
@@ -155,12 +150,9 @@ class SimpleSolver(object):
         jobs_tasks = {}
         for job in jobList:
             jobs_tasks[job.jid] = list(copy.deepcopy(job.get_tasks_list()))
-    #    try:
         while jobList:
             for job in jobList:
-                #logger.debug("BEFORE TAKING: %s->%s", job.jid,jobs_tasks[job.jid])
                 task = jobs_tasks[job.jid][0]
-
                 if currentTime >= machines[task.machine].taskEndTime and self.__notInProgress(job, machines, currentTime):
                     machines[task.machine].taskEndTime = currentTime + task.get_duration()
                     machines[task.machine].jobInProgress = job
@@ -168,17 +160,9 @@ class SimpleSolver(object):
                     task.set_start_time(currentTime)
                     solution.append_task_to_machine(task)
                     jobs_tasks[job.jid].remove(task)
-
-                #logger.debug("CHECKING EMPTY: %s", job.jid)
-
                 if not jobs_tasks[job.jid]:
                     jobList.remove(job)
             currentTime += 1
-    #except Exception as e:
-    #    logger.debug("EXCEPTION %s", e)
-    #    logger.debug(jobList)
-    #    raise e
-        #solution.set_completion_time(currentTime-1+lastTimeAdded)
         return solution
 
     def __getPermutations(self, jobList):
