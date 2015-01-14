@@ -1,4 +1,5 @@
 # coding=utf-8
+# -*- coding: utf-8 -*-
 import logging
 
 from genetic_classes import *
@@ -10,8 +11,12 @@ from pyage.jobshop.statistics import  GanttStatistics
 from pyage.jobshop.timeKeeper import TimeKeeper
 from pyage.jobshop.manufacture import Manufacture
 
-logger = logging.getLogger(__name__)
 
+
+
+
+
+logger = logging.getLogger(__name__)
 agents_count = 1
 jobshop_agents = 10
 machines_number = 4

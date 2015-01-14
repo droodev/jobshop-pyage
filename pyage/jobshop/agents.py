@@ -80,7 +80,7 @@ class MasterAgent(object):
         return min_fitness_agent.get_solution()
 
 class SlaveAgent(object):
-    @Inject("operators:_SlaveAgent__mutation")
+    @Inject("mutation:_SlaveAgent__mutation")
     @Inject("evaluation:_SlaveAgent__evaluation")
     @Inject("selection:_SlaveAgent__selection")
     def __init__(self, aid):
@@ -96,7 +96,7 @@ class SlaveAgent(object):
 
     def step(self):
         #logger.debug("Slave step")
-        self.population.append(self.__mutation.mutate(self.genotype))
+        self.population.append(self.__mutation.mutate(self.population))
         self.__evaluation.process(self.population)
         self.__selection.process(self.population)
         self.fitness = self.population[0].fitness

@@ -5,7 +5,6 @@ import time
 import sys
 
 from pyage.core.inject import InjectOptional, Inject
-from pyage.core.gantt_generator import GanttGenerator
 
 
 logger = logging.getLogger(__name__)
