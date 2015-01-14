@@ -1,16 +1,10 @@
 # coding=utf-8
 import logging
-import os
-import Pyro4
 
+from genetic_classes import *
 from pyage.core import address
 from pyage.jobshop.agents import masters_factory, slaves_factory
-from pyage.core.agent.aggregate import AggregateAgent
-from pyage.core.locator import  RandomLocator
-from pyage.core.migration import Pyro4Migration
 from pyage.core.stop_condition import StepLimitStopCondition
-from pyage.jobshop.problem import  Problem
-from pyage.jobshop.adjuster import  Adjuster
 from pyage.jobshop.problemGenerator import  ProblemGenerator, UniformIntDistribution, RandomizedTasksProvider, PredictedProblemGenerator, RandomizedProblemProvider
 from pyage.jobshop.statistics import  GanttStatistics
 from pyage.jobshop.timeKeeper import TimeKeeper
@@ -54,10 +48,9 @@ slaves = slaves_factory(jobshop_agents)
 
 stop_condition = lambda: StepLimitStopCondition(100)
 
-population_size = 500
-operators = lambda: [FloatRastriginEvaluation(), TournamentSelection(size=55, tournament_size=30),
-                     Crossover(size=population_size), Mutation()]
-initializer = lambda: Initializer()
+evaluation = lambda: BasicJobShopEvaluation(machines_number)
+selection = lambda: BasicJobShopSelection()
+mutation = lambda: BasicJobShopMutation()
 
 address_provider = address.SequenceAddressProvider
 

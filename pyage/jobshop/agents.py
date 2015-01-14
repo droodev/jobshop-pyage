@@ -1,3 +1,4 @@
+from pyage.jobshop.genetic_classes import *
 import logging
 import itertools
 import copy
@@ -79,25 +80,37 @@ class MasterAgent(object):
         return min_fitness_agent.get_solution()
 
 class SlaveAgent(object):
+    @Inject("operators:_SlaveAgent__mutation")
+    @Inject("evaluation:_SlaveAgent__evaluation")
+    @Inject("selection:_SlaveAgent__selection")
     def __init__(self, aid):
         self.steps = 1
         self.aid = aid
+        self.fitness = None
+        self.population = []
 
     def append_problem(self, problem, predicted_problem):
         #logger.debug("%d New problem for slave appended: \n%s\n with predicted\n %s ", self.aid, problem, predicted_problem)
-        self.solver = SimpleSolver(4, problem)
+        self.population = [JobShopGenotype(problem)]
         self.predicted_problem = predicted_problem
 
     def step(self):
         #logger.debug("Slave step")
-        self.solver.step()
+        self.population.append(self.__mutation.mutate(self.genotype))
+        self.__evaluation.process(self.population)
+        self.__selection.process(self.population)
+        self.fitness = self.population[0].fitness
         self.steps += 1
 
     def get_fitness(self):
-        return self.solver.get_fitness()
+        if self.fitness is None:
+
+            self.__evaluation.process(self.population)
+            self.fitness = self.population[0].fitness
+        return self.fitness
 
     def get_solution(self):
-        return self.solver.get_solution()
+        return self.__evaluation.schedule()
 
     def check_predicated_problem(self, checked_problem):
         if checked_problem.represents_same(self.predicted_problem):
@@ -105,65 +118,6 @@ class SlaveAgent(object):
             logger.debug("%d predicted: %s\n",self.aid, self.predicted_problem)
             return True
 
-
-class SimpleSolver(object):
-
-    def __init__(self, machines_nr, problem):
-        self.machines_nr = machines_nr
-        self.problem = problem
-        self.permutations = self.__getPermutations(problem.get_jobs_list())
-        self.bestSolution = None
-
-    def step(self):
-        try:
-            current_permutation = self.permutations.next()
-        except(StopIteration):
-            return
-        solution = self.__solveStuff(list(copy.deepcopy(current_permutation)))
-        if self.bestSolution is None or solution.get_completion_time() < self.bestSolution.get_completion_time():
-                self.bestSolution = solution
-
-    def get_fitness(self):
-        return self.bestSolution.get_completion_time()
-
-    def get_solution(self):
-        return self.bestSolution
-
-
-    '''zwraca liste [czas-rozwiazania, rozwiazanie]  '''
-    def __solveStuff(self, jobList):
-        ending_times = [0 for _ in xrange(self.machines_nr)]
-        jobs_in_progress = [None for _ in xrange(self.machines_nr)]
-        currentTime = 0
-        lastTimeAdded = 0
-        solution = Solution(self.machines_nr)
-        jobs_tasks = {}
-        for job in jobList:
-            jobs_tasks[job.jid] = list(copy.deepcopy(job.get_tasks_list()))
-        while jobList:
-            for job in jobList:
-                task = jobs_tasks[job.jid][0]
-                if currentTime >= ending_times[task.machine] and self.__notInProgress(job, ending_times, jobs_in_progress, currentTime):
-                    ending_times[task.machine] = currentTime + task.get_duration()
-                    jobs_in_progress[task.machine] = job
-                    lastTimeAdded = task.get_duration()
-                    task.set_start_time(currentTime)
-                    solution.append_task_to_machine(task)
-                    jobs_tasks[job.jid].remove(task)
-                if not jobs_tasks[job.jid]:
-                    jobList.remove(job)
-            currentTime += 1
-        return solution
-
-    def __getPermutations(self, jobList):
-        return itertools.permutations(jobList,len(jobList))
-
-    '''wymogi JobShop - jeden job moze naraz isc tylko na jednej maszynie'''
-    def __notInProgress(self, job, ending_times, jobs_in_progress, currentTime):
-        for i in xrange(len(jobs_in_progress)):
-            if currentTime < ending_times[i] and job.jid == jobs_in_progress[i].jid:
-                return False
-        return True
 
 def masters_factory(count):
     return _agents_factory(count, MasterAgent)

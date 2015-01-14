@@ -18,30 +18,40 @@ class JobShopGenotype(object):
         self.genes = joblist
         self.fitness = None
         
+    def __init_from_problem__(self,problem):
+        self.problem = problem
+        self.genes = self.nonrandom_generate_genes(problem)
+        self.fitness = None
+
     def getSolutionOutOfGenotype(self):
         return BasicJobShopEvaluation.schedule(self.genes)
         
+    def nonrandom_generate_genes(self, problem):
+        joblist = []
+        for job in problem:
+            for task in job:
+                joblist.append(job.jid)
+        return joblist
+
 class BasicJobShopEvaluation(Operator):
     
     def __init__(self,machines_nr):
         super(BasicJobShopEvaluation, self).__init__(JobShopGenotype)
         self.machines_nr = machines_nr
-        
+        self.solution = None
     
     def process(self, population):
         for genotype in population:
             genotype.fitness = self.__schedule_time(genotype.genes)
-            
+
+    ''' arbitrary sign change to conserve bigger == better'''
     def __schedule_time(self, genes):
-        return self.schedule(genes).get_completion_time()
-        
+        return self.schedule(genes).get_completion_time() * (-1)
+
     def schedule(self,genes):
-        machines = []
-        for num in xrange(self.machines_nr):
-            #Machine not imported, class won't be used in the same shape in future versions probably
-            machines.append(Machine(num))
+        ending_times = [0 for _ in xrange(self.machines_nr)]
+        jobs_in_progress = [None for _ in xrange(self.machines_nr)]
         currentTime = 0
-        lastTimeAdded = 0
         solution = Solution(self.machines_nr)
         jobs_tasks = {}
         jobList = list(copy.deepcopy(genes))
@@ -51,22 +61,21 @@ class BasicJobShopEvaluation(Operator):
         while jobList:
             for job in jobList:
                 task = jobs_tasks[job.jid][0]
-                if currentTime >= machines[task.machine].taskEndTime and self.__notInProgress(job, machines, currentTime):
-                    machines[task.machine].taskEndTime = currentTime + task.get_duration()
-                    machines[task.machine].jobInProgress = job.get_jid()
-                    lastTimeAdded = task.get_duration()
+                if currentTime >= ending_times[task.machine] and self.__notInProgress(job, ending_times, jobs_in_progress, currentTime):
+                    ending_times[task.machine] = currentTime + task.get_duration()
+                    jobs_in_progress[task.machine] = job
                     task.set_start_time(currentTime)
-                    solution.append_job_to_machine(task.machine, job)
+                    solution.append_task_to_machine(task)
                     jobs_tasks[job.jid].remove(task)
                 if not jobs_tasks[job.jid]:
                     jobList.remove(job)
             currentTime += 1
-        solution.set_completion_time(currentTime-1+lastTimeAdded)
         return solution
-            
-    def __notInProgress(self, job, machines, currentTime):
-        for x in machines:
-            if currentTime < x.taskEndTime and x.jobInProgress == job.get_jid():
+
+    '''wymogi JobShop - jeden job moze naraz isc tylko na jednej maszynie'''
+    def __notInProgress(self, job, ending_times, jobs_in_progress, currentTime):
+        for i in xrange(len(jobs_in_progress)):
+            if currentTime < ending_times[i] and job.jid == jobs_in_progress[i].jid:
                 return False
         return True
 
@@ -100,3 +109,16 @@ class OnePointJobShopCrossover(AbstractCrossover):
         for job in p2copy:
             child.append(job)
         return child
+
+
+class BasicJobShopSelection(Operator):
+    def __init__(self, type=None):
+        super(BasicJobShopSelection, self).__init__()
+
+    def process(self, population):
+        p = list(population)
+        population[:] = []
+        gen1 = p[0]
+        gen2 = p[1]
+        winner = gen1 if gen1.fitness > gen2.fitness else gen2
+        population.append(winner)
