@@ -15,11 +15,7 @@ from pyage.jobshop.problem import Solution
 class JobShopGenotype(object):
     ''' uporzadkowana lista [Jobnumber, Jobnumber, Jobnumber,...] o długosci rownej ilosci taskow
         n-te wystapienie danego numeru joba oznacza zakolejkowanie w danej chwili n-tego taska tego joba'''
-    def __init__(self, joblist):
-        self.genes = joblist
-        self.fitness = None
-        
-    def __init_from_problem__(self,problem):
+    def __init__(self, problem):
         self.problem = problem
         self.genes = self.nonrandom_generate_genes(problem)
         self.fitness = None
@@ -29,9 +25,9 @@ class JobShopGenotype(object):
         
     def nonrandom_generate_genes(self, problem):
         joblist = []
-        for job in problem:
-            for task in job:
-                joblist.append(job.jid)
+        for job in problem.get_jobs_list():
+            for task in job.get_tasks_list():
+                joblist.append(job)
         return joblist
 
 class BasicJobShopEvaluation(Operator):
@@ -42,7 +38,9 @@ class BasicJobShopEvaluation(Operator):
         self.solution = None
     
     def process(self, population):
+        print population
         for genotype in population:
+            print genotype
             genotype.fitness = self.__schedule_time(genotype.genes)
 
     ''' arbitrary sign change to conserve bigger == better'''
@@ -57,18 +55,18 @@ class BasicJobShopEvaluation(Operator):
         jobs_tasks = {}
         jobList = list(copy.deepcopy(genes))
         for job in jobList:
-            jobs_tasks[job.jid] = job.get_tasks_list()
-        
+            jobs_tasks[job.jid] = list(copy.deepcopy(job.get_tasks_list()))
+        print jobs_tasks
         while jobList:
             for job in jobList:
                 task = jobs_tasks[job.jid][0]
                 if currentTime >= ending_times[task.machine] and self.__notInProgress(job, ending_times, jobs_in_progress, currentTime):
+                    print "I'm in " + str(job.jid)
                     ending_times[task.machine] = currentTime + task.get_duration()
                     jobs_in_progress[task.machine] = job
                     task.set_start_time(currentTime)
                     solution.append_task_to_machine(task)
                     jobs_tasks[job.jid].remove(task)
-                if not jobs_tasks[job.jid]:
                     jobList.remove(job)
             currentTime += 1
         return solution
@@ -86,13 +84,19 @@ class BasicJobShopMutation(AbstractMutation):
     def __init__(self,probability=0.1):
         super(BasicJobShopMutation, self).__init__(JobShopGenotype, probability)
         
-    def mutate(self, genotype):
-        length = len(genotype)
+    def mutate(self, population):
+        print population
+        genotypeOld = population[0]
+        genotype = copy.deepcopy(genotypeOld)
+        length = len(genotype.genes)
+        if length <= 1:
+            return genotype
         a = randrange(length)
         b = randrange(length)
         while a == b:
             b = randrange(length)
-        genotype[a], genotype[b] = genotype[b], genotype[a]
+        genotype.genes[a], genotype.genes[b] = genotype.genes[b], genotype.genes[a]
+        return genotype
         
 '''Od poczatku do punktu przeciecia - pierwszy rodzic, w dal - prawy rodzic'''
 class OnePointJobShopCrossover(AbstractCrossover):

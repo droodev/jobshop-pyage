@@ -100,6 +100,8 @@ class SlaveAgent(object):
         self.__evaluation.process(self.population)
         self.__selection.process(self.population)
         self.fitness = self.population[0].fitness
+        print self.fitness
+        print self.get_solution()
         self.steps += 1
 
     def get_fitness(self):
@@ -110,7 +112,7 @@ class SlaveAgent(object):
         return self.fitness
 
     def get_solution(self):
-        return self.__evaluation.schedule()
+        return self.__evaluation.schedule(self.population[0].genes)
 
     def check_predicated_problem(self, checked_problem):
         if checked_problem.represents_same(self.predicted_problem):
