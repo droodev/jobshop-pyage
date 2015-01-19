@@ -30,6 +30,14 @@ class JobShopGenotype(object):
                 joblist.append(job)
         return joblist
 
+    def __str__(self):
+        string = "["
+        for job in self.genes:
+            string += str(job.jid) + ","
+        string += "]"
+        string += str(self.fitness)
+        return string
+
 class BasicJobShopEvaluation(Operator):
     
     def __init__(self,machines_nr):
@@ -38,14 +46,12 @@ class BasicJobShopEvaluation(Operator):
         self.solution = None
     
     def process(self, population):
-        print population
         for genotype in population:
-            print genotype
             genotype.fitness = self.__schedule_time(genotype.genes)
 
     ''' arbitrary sign change to conserve bigger == better'''
     def __schedule_time(self, genes):
-        return self.schedule(genes).get_completion_time() * (-1)
+        return self.schedule(genes).get_completion_time()
 
     def schedule(self,genes):
         ending_times = [0 for _ in xrange(self.machines_nr)]
@@ -56,12 +62,10 @@ class BasicJobShopEvaluation(Operator):
         jobList = list(copy.deepcopy(genes))
         for job in jobList:
             jobs_tasks[job.jid] = list(copy.deepcopy(job.get_tasks_list()))
-        print jobs_tasks
         while jobList:
             for job in jobList:
                 task = jobs_tasks[job.jid][0]
                 if currentTime >= ending_times[task.machine] and self.__notInProgress(job, ending_times, jobs_in_progress, currentTime):
-                    print "I'm in " + str(job.jid)
                     ending_times[task.machine] = currentTime + task.get_duration()
                     jobs_in_progress[task.machine] = job
                     task.set_start_time(currentTime)
@@ -85,7 +89,6 @@ class BasicJobShopMutation(AbstractMutation):
         super(BasicJobShopMutation, self).__init__(JobShopGenotype, probability)
         
     def mutate(self, population):
-        print population
         genotypeOld = population[0]
         genotype = copy.deepcopy(genotypeOld)
         length = len(genotype.genes)
@@ -97,7 +100,32 @@ class BasicJobShopMutation(AbstractMutation):
             b = randrange(length)
         genotype.genes[a], genotype.genes[b] = genotype.genes[b], genotype.genes[a]
         return genotype
-        
+
+class GreaterJobShopMutation(AbstractMutation):
+    def __init__(self,probability=0.1):
+        super(GreaterJobShopMutation, self).__init__(JobShopGenotype, probability)
+
+
+    def mutate(self,population):
+        genotype = population[0]
+        for i in range(1,5):
+            genotype = self.single_mutate([genotype])
+        print genotype
+        return genotype
+
+    def single_mutate(self, population):
+        genotypeOld = population[0]
+        genotype = copy.deepcopy(genotypeOld)
+        length = len(genotype.genes)
+        if length <= 1:
+            return genotype
+        a = randrange(length)
+        b = randrange(length)
+        while a == b:
+            b = randrange(length)
+        genotype.genes[a], genotype.genes[b] = genotype.genes[b], genotype.genes[a]
+        return genotype
+
 '''Od poczatku do punktu przeciecia - pierwszy rodzic, w dal - prawy rodzic'''
 class OnePointJobShopCrossover(AbstractCrossover):
     '''I don't really know yet how this size relates to amount of agents run'''

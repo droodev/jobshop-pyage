@@ -18,7 +18,7 @@ from pyage.jobshop.manufacture import Manufacture
 
 logger = logging.getLogger(__name__)
 agents_count = 1
-jobshop_agents = 10
+jobshop_agents = 1
 machines_number = 4
 logger.debug("AGGREGATE, %s agents", agents_count)
 
@@ -55,7 +55,7 @@ stop_condition = lambda: StepLimitStopCondition(100)
 
 evaluation = lambda: BasicJobShopEvaluation(machines_number)
 selection = lambda: BasicJobShopSelection()
-mutation = lambda: BasicJobShopMutation()
+mutation = lambda: GreaterJobShopMutation()
 
 address_provider = address.SequenceAddressProvider
 

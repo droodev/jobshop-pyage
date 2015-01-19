@@ -91,6 +91,7 @@ class SlaveAgent(object):
 
     def append_problem(self, problem, predicted_problem):
         #logger.debug("%d New problem for slave appended: \n%s\n with predicted\n %s ", self.aid, problem, predicted_problem)
+        print "stuff happens"
         self.population = [JobShopGenotype(problem)]
         self.predicted_problem = predicted_problem
 
@@ -100,8 +101,6 @@ class SlaveAgent(object):
         self.__evaluation.process(self.population)
         self.__selection.process(self.population)
         self.fitness = self.population[0].fitness
-        print self.fitness
-        print self.get_solution()
         self.steps += 1
 
     def get_fitness(self):
