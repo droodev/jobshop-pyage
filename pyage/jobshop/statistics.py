@@ -19,7 +19,7 @@ class DummyStats(Statistics):
 		pass
 
 class GanttStatistics(Statistics):
-    gantt = GanttGenerator(None, 'gantt')
+    gantt = GanttGenerator('gantt')
     def update(self, step_count, agents):
         pass
 
