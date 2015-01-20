@@ -62,9 +62,9 @@ class Manufacture(object):
 
         #creating problem from tasks_list
         logger.debug("Taken tasks:\n %s", map(str,tasks_list))
-        jobs_categorized = dict([(t.task.job.jid, []) for t in tasks_list])
+        jobs_categorized = dict([(t.job.jid, []) for t in tasks_list])
         for task in tasks_list:
-            jobs_categorized[task.task.job.jid].append(task)
+            jobs_categorized[task.job.jid].append(task)
 
         jobs_lists = []
         for jid, tlist in jobs_categorized.items():

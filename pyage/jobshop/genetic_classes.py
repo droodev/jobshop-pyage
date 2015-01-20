@@ -11,7 +11,6 @@ import copy
 from pyage.solutions.evolution.mutation import AbstractMutation
 from pyage.solutions.evolution.crossover import AbstractCrossover
 from pyage.jobshop.problem import Solution
-from pyage.jobshop.problem import TaskWithStartTime
 
 class JobShopGenotype(object):
     ''' uporzadkowana lista [Jobnumber, Jobnumber, Jobnumber,...] o długosci rownej ilosci taskow
@@ -66,8 +65,6 @@ class BasicJobShopEvaluation(Operator):
         while jobList:
             for job in jobList:
                 task = jobs_tasks[job.jid][0]
-                if isinstance(task, TaskWithStartTime):
-                    task = task.task
                 if currentTime >= ending_times[task.machine] and self.__notInProgress(job, ending_times, jobs_in_progress, currentTime):
                     ending_times[task.machine] = currentTime + task.get_duration()
                     jobs_in_progress[task.machine] = job
