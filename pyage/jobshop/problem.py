@@ -121,10 +121,6 @@ class Solution(object):
 
 	def append_task_to_machine(self, task, timestamp=0):
 		machine_nr = task.get_task_machine()
-		if timestamp > self.__machines_end_times[machine_nr]:
-			task.set_start_time(timestamp)
-		else:
-			task.set_start_time(self.__machines_end_times[machine_nr])
 		self.__machines_tasks[machine_nr].append(task)
 		self.__machines_end_times[machine_nr] = task.get_start_time() + task.get_duration()
 
