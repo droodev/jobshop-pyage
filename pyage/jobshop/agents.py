@@ -94,6 +94,7 @@ class SlaveAgent(object):
         print "stuff happens"
         self.population = [JobShopGenotype(problem)]
         self.predicted_problem = predicted_problem
+        print self.__evaluation.schedule(self.population[0].genes)
 
     def step(self):
         #logger.debug("Slave step")
@@ -104,6 +105,7 @@ class SlaveAgent(object):
         self.steps += 1
 
     def get_fitness(self):
+        print "fitness got"
         if self.fitness is None:
 
             self.__evaluation.process(self.population)
@@ -111,6 +113,7 @@ class SlaveAgent(object):
         return self.fitness
 
     def get_solution(self):
+        print "solution got"
         return self.__evaluation.schedule(self.population[0].genes)
 
     def check_predicated_problem(self, checked_problem):

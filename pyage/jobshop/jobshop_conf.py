@@ -22,15 +22,15 @@ jobshop_agents = 1
 machines_number = 4
 logger.debug("AGGREGATE, %s agents", agents_count)
 
-seed = 1200999
+seed = 120039
 
-timeKeeper = lambda: TimeKeeper(5,-1)
+timeKeeper = lambda: TimeKeeper(50,-1)
 manufacture = lambda: Manufacture(machines_number)
 
 start_problem_provider = RandomizedProblemProvider(
 				machines_number = machines_number,
 				jobs_number = 7,
-				job_duration_distrib = UniformIntDistribution(7,10),
+				job_duration_distrib = UniformIntDistribution(17,28),
 				tasks_number_distrib = UniformIntDistribution(2,3),
 				tasks_provider = RandomizedTasksProvider(machines_number)
 				,seed = seed
@@ -51,7 +51,7 @@ predictedProblemGenerator = lambda: PredictedProblemGenerator(predicted_problem_
 agents = masters_factory(agents_count)
 slaves = slaves_factory(jobshop_agents)
 
-stop_condition = lambda: StepLimitStopCondition(100)
+stop_condition = lambda: StepLimitStopCondition(1000)
 
 evaluation = lambda: BasicJobShopEvaluation(machines_number)
 selection = lambda: BasicJobShopSelection()

@@ -100,31 +100,55 @@ class Task(object):
 	def __eq__(self, other):
 		return self.machine == other.machine and self.duration == other.duration
 
+
+class TaskWithStartTime(object):
+	def __init__(self, task, startTime):
+		self.task = task
+		self.startTime = startTime
+
+
+	def __str__(self):
+		return "Start time: " + str(self.startTime) + str(self.task)
+
+
 class Solution(object):
 
 	def __init__(self, machines_nr):
 		self.__machines_nr = machines_nr
+		self.__machines_start_times = {}
 		self.__machines_end_times = {}
 		self.__machines_tasks = {}
 		self.__initialize_machines_dicts(machines_nr)
 
 	def __initialize_machines_dicts(self, machines_nr):
 		for i in xrange(machines_nr):
+			self.__machines_start_times[i] = []
 			self.__machines_tasks[i] = []
 			self.__machines_end_times[i] = 0
 
-	def append_task_to_machine(self, task):
+	def append_task_to_machine(self, task, timestamp=0):
 		machine_nr = task.get_task_machine()
-		self.__machines_tasks[machine_nr].append(task)
-		self.__machines_end_times[machine_nr] += task.get_duration()
-		
+		if isinstance(task,TaskWithStartTime):
+			timeTask = task
+		elif timestamp > self.__machines_end_times[machine_nr]:
+			timeTask = TaskWithStartTime(task,timestamp)
+		else:
+			timeTask = TaskWithStartTime(task,self.__machines_end_times[machine_nr])
+			self.__machines_end_times[machine_nr] = timestamp
+		self.__machines_tasks[machine_nr].append(timeTask)
+		self.__machines_end_times[machine_nr] = timeTask.startTime + timeTask.task.get_duration()
+
 	def get_completion_time(self):
 		return max(self.__machines_end_times.values())
 
-	def pop_head_task(self, machine_number):
+	def pop_head_task(self, machine_number, time):
 		head_task = self.__machines_tasks[machine_number][0]
+		print "TASK IN QUESTION: " + str(head_task)
+		if time < head_task.startTime:
+			raise IndexError
+		print "PASSED"
 		self.__remove_first_task(machine_number)
-		return head_task
+		return head_task.task
 
 	def get_tasks(self, machine_number):
 		return self.__machines_tasks[machine_number]

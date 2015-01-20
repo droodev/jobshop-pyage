@@ -36,7 +36,8 @@ class Manufacture(object):
             if machine.taskEndTime <= time:
                 logger.debug("Updating machine: %d", machine.idd)
                 try:
-                    task = self.solution.pop_head_task(machine.idd)
+                    print "CHECK AND UPDATE: POP, " + str(time)
+                    task = self.solution.pop_head_task(machine.idd, time)
                     machine.taskEndTime = time+task.get_duration()
                     logger.debug("New endtime: %d", machine.taskEndTime)
                     self.history.append([ machine.idd, task.get_task_job().get_jid(), time, task.get_duration(), 'Tick ' + str(time) ])
@@ -61,9 +62,9 @@ class Manufacture(object):
 
         #creating problem from tasks_list
         logger.debug("Taken tasks:\n %s", map(str,tasks_list))
-        jobs_categorized = dict([(t.job.jid, []) for t in tasks_list])
+        jobs_categorized = dict([(t.task.job.jid, []) for t in tasks_list])
         for task in tasks_list:
-            jobs_categorized[task.job.jid].append(task)
+            jobs_categorized[task.task.job.jid].append(task)
 
         jobs_lists = []
         for jid, tlist in jobs_categorized.items():
