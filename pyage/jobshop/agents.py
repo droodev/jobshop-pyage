@@ -31,7 +31,7 @@ class MasterAgent(object):
     def step(self):
         self.__timeKeeper.step()
         if (not self.__manufacture.tasks_assigned()) and (self.__timeKeeper.get_time() == 0):
-            self.__manufacture.assign_tasks(self.get_solution())
+            self.__manufacture.assign_tasks(self.get_solution(self.__timeKeeper.get_time()))
             self.__assign_predicted_and_solution_part()
         self.__manufacture.time_tick(self.__timeKeeper.get_time())
         if self._MasterAgent__problemGenerator.check_new_problem(self.steps):
@@ -44,6 +44,7 @@ class MasterAgent(object):
                     if agent.check_predicated_problem(new_problem):
                         logger.debug("Agent with good pred_problem")
                         new_solution = agent.get_solution()
+                        new_solution.adjustTasksWithTime(self.__timeKeeper.get_time())
                         #logger.debug("Pretty new solution\n %s",new_solution)
                         self.__manufacture.assign_tasks(new_solution)
                         self.__assign_predicted_and_solution_part()
@@ -75,9 +76,11 @@ class MasterAgent(object):
         logger.debug("Taken fitness is %d\n", min_fitness_agent.get_fitness())
         return min_fitness_agent.get_fitness()
 
-    def get_solution(self):
+    def get_solution(self, time):
         min_fitness_agent = min(self.__slaves.values(), key=lambda x: x.get_fitness)
-        return min_fitness_agent.get_solution()
+        solution = min_fitness_agent.get_solution()
+        solution.adjustTasksWithTime(time)
+        return solution
 
 class SlaveAgent(object):
     @Inject("mutation:_SlaveAgent__mutation")
@@ -91,7 +94,6 @@ class SlaveAgent(object):
 
     def append_problem(self, problem, predicted_problem):
         #logger.debug("%d New problem for slave appended: \n%s\n with predicted\n %s ", self.aid, problem, predicted_problem)
-        print "stuff happens"
         self.population = [JobShopGenotype(problem)]
         self.predicted_problem = predicted_problem
         print self.__evaluation.schedule(self.population[0].genes)
@@ -105,7 +107,6 @@ class SlaveAgent(object):
         self.steps += 1
 
     def get_fitness(self):
-        print "fitness got"
         if self.fitness is None:
 
             self.__evaluation.process(self.population)
@@ -113,7 +114,7 @@ class SlaveAgent(object):
         return self.fitness
 
     def get_solution(self):
-        print "solution got"
+        print self.__evaluation.schedule(self.population[0].genes)
         return self.__evaluation.schedule(self.population[0].genes)
 
     def check_predicated_problem(self, checked_problem):

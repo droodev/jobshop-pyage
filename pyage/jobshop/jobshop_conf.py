@@ -18,13 +18,13 @@ from pyage.jobshop.manufacture import Manufacture
 
 logger = logging.getLogger(__name__)
 agents_count = 1
-jobshop_agents = 1
+jobshop_agents = 10
 machines_number = 4
 logger.debug("AGGREGATE, %s agents", agents_count)
 
 seed = 120039
 
-timeKeeper = lambda: TimeKeeper(50,-1)
+timeKeeper = lambda: TimeKeeper(5,-1)
 manufacture = lambda: Manufacture(machines_number)
 
 start_problem_provider = RandomizedProblemProvider(
@@ -44,7 +44,7 @@ predicted_problem_provider = RandomizedProblemProvider(
 				,seed = seed
 			)
 
-problemGenerator = lambda: ProblemGenerator(50, start_problem_provider, predicted_problem_provider)
+problemGenerator = lambda: ProblemGenerator(100, start_problem_provider, predicted_problem_provider)
 
 predictedProblemGenerator = lambda: PredictedProblemGenerator(predicted_problem_provider, jobshop_agents)
 
