@@ -7,6 +7,7 @@ class GanttGenerator(object):
     __tasks = {}
     __N = 50
     __n_machines = 0
+    __fig = plt.figure(figsize=(16,8))
 
     __colors = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),
              (44, 160, 44), (152, 223, 138), (214, 39, 40), (255, 152, 150),
@@ -59,4 +60,5 @@ class GanttGenerator(object):
             plt.yticks(range(0, len(self.__tasks), 1))
         else:
             plt.yticks(range(0, self.__n_machines, 1))
-        plt.savefig(self.__out_dir + sep + title + '.png')
+
+        self.__fig.savefig(self.__out_dir + sep + title + '.png')
