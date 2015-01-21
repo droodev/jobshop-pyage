@@ -60,5 +60,5 @@ class GanttGenerator(object):
             plt.yticks(range(0, len(self.__tasks), 1))
         else:
             plt.yticks(range(0, self.__n_machines, 1))
-
+        self.__fig.set_size_inches(max_duration, self.__n_machines)
         self.__fig.savefig(self.__out_dir + sep + title + '.png')
