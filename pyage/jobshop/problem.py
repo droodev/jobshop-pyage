@@ -159,6 +159,11 @@ class Solution(object):
 		return new_solution
 
 
+	def adjustTasksWithTime(self, time):
+		for machine in 	self.__machines_tasks:
+			for task in self.__machines_tasks[machine]:
+				task.set_start_time(task.get_start_time() + time)
+
 	def __str__(self):
 		machine_strings_list = []
 		for m_nr in xrange(self.__machines_nr):

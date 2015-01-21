@@ -122,7 +122,8 @@ class RandomizedTasksProvider(object):
 		remaining_duration = job_duration
 		tasks = []
 		for task_counter in xrange(tasks_number):
-			task_machine = task_counter % self.__machines_nr
+			#task_machine = task_counter % self.__machines_nr
+			task_machine = self.__random.randint(0,self.__machines_nr-1)
 			task_duration = int(self.__random.gauss(average, std_dev))
 			positive_task_duration = max(1, task_duration)
 			if task_counter == tasks_number-1:

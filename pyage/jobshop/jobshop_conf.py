@@ -19,7 +19,7 @@ from pyage.jobshop.manufacture import Manufacture
 logger = logging.getLogger(__name__)
 agents_count = 1
 jobshop_agents = 10
-machines_number = 4
+machines_number = 5
 logger.debug("AGGREGATE, %s agents", agents_count)
 
 seed = 120039
@@ -29,9 +29,9 @@ manufacture = lambda: Manufacture(machines_number)
 
 start_problem_provider = RandomizedProblemProvider(
 				machines_number = machines_number,
-				jobs_number = 7,
+				jobs_number = 10,
 				job_duration_distrib = UniformIntDistribution(17,28),
-				tasks_number_distrib = UniformIntDistribution(2,3),
+				tasks_number_distrib = UniformIntDistribution(1,3),
 				tasks_provider = RandomizedTasksProvider(machines_number)
 				,seed = seed
 			)
