@@ -47,7 +47,7 @@ class BasicJobShopEvaluation(Operator):
     
     def process(self, population):
         for genotype in population:
-            genotype.fitness = self.__schedule_time(genotype.genes)
+            genotype.fitness = self.__schedule_time(genotype.genes) * (-1)
 
     ''' arbitrary sign change to conserve bigger == better'''
     def __schedule_time(self, genes):
@@ -69,7 +69,7 @@ class BasicJobShopEvaluation(Operator):
                     ending_times[task.machine] = currentTime + task.get_duration()
                     jobs_in_progress[task.machine] = job
                     task.set_start_time(currentTime)
-                    solution.append_task_to_machine(task)
+                    solution.append_task_to_machine(task, currentTime)
                     jobs_tasks[job.jid].remove(task)
                     jobList.remove(job)
             currentTime += 1
@@ -110,7 +110,6 @@ class GreaterJobShopMutation(AbstractMutation):
         genotype = population[0]
         for i in range(1,5):
             genotype = self.single_mutate([genotype])
-        print genotype
         return genotype
 
     def single_mutate(self, population):

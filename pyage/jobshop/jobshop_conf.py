@@ -29,9 +29,9 @@ manufacture = lambda: Manufacture(machines_number)
 
 start_problem_provider = RandomizedProblemProvider(
 				machines_number = machines_number,
-				jobs_number = 40,
-				job_duration_distrib = UniformIntDistribution(7,10),
-				tasks_number_distrib = UniformIntDistribution(2,3),
+				jobs_number = 10,
+				job_duration_distrib = UniformIntDistribution(17,28),
+				tasks_number_distrib = UniformIntDistribution(1,3),
 				tasks_provider = RandomizedTasksProvider(machines_number)
 				,seed = seed
 			)

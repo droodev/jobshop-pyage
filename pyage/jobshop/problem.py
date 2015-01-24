@@ -79,7 +79,7 @@ class Task(object):
 		self.duration = duration
 
 	def __str__(self):
-		return "Task of job: " + str(self.job.jid) +" at machine: " + str(self.machine) + " lasting: " + str(self.duration) 
+		return "Start at " + str(self.start_time) + " Task of job: " + str(self.job.jid) +" at machine: " + str(self.machine) + " lasting: " + str(self.duration)
 
 	def get_str_without_jobnr(self):
 		return "Task at machine: " + str(self.machine) + " lasting: " + str(self.duration) 
@@ -91,6 +91,9 @@ class Task(object):
 	def set_start_time(self, time):
 		self.start_time=time
 
+	def get_start_time(self):
+		return self.start_time
+
 	def get_task_machine(self):
 		return self.machine
 
@@ -100,29 +103,36 @@ class Task(object):
 	def __eq__(self, other):
 		return self.machine == other.machine and self.duration == other.duration
 
+
 class Solution(object):
 
 	def __init__(self, machines_nr):
 		self.__machines_nr = machines_nr
+		self.__machines_start_times = {}
 		self.__machines_end_times = {}
 		self.__machines_tasks = {}
 		self.__initialize_machines_dicts(machines_nr)
 
 	def __initialize_machines_dicts(self, machines_nr):
 		for i in xrange(machines_nr):
+			self.__machines_start_times[i] = []
 			self.__machines_tasks[i] = []
 			self.__machines_end_times[i] = 0
 
-	def append_task_to_machine(self, task):
+	def append_task_to_machine(self, task, timestamp=0):
 		machine_nr = task.get_task_machine()
 		self.__machines_tasks[machine_nr].append(task)
-		self.__machines_end_times[machine_nr] += task.get_duration()
-		
+		self.__machines_end_times[machine_nr] = task.get_start_time() + task.get_duration()
+
 	def get_completion_time(self):
 		return max(self.__machines_end_times.values())
 
-	def pop_head_task(self, machine_number):
+	def pop_head_task(self, machine_number, time):
 		head_task = self.__machines_tasks[machine_number][0]
+		print "TASK IN QUESTION: " + str(head_task)
+		if time < head_task.get_start_time():
+			raise IndexError
+		print "PASSED"
 		self.__remove_first_task(machine_number)
 		return head_task
 
@@ -148,6 +158,11 @@ class Solution(object):
 
 		return new_solution
 
+
+	def adjustTasksWithTime(self, time):
+		for machine in 	self.__machines_tasks:
+			for task in self.__machines_tasks[machine]:
+				task.set_start_time(task.get_start_time() + time)
 
 	def __str__(self):
 		machine_strings_list = []

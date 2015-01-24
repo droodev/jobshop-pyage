@@ -36,7 +36,8 @@ class Manufacture(object):
             if machine.taskEndTime <= time:
                 logger.debug("Updating machine: %d", machine.idd)
                 try:
-                    task = self.solution.pop_head_task(machine.idd)
+                    print "CHECK AND UPDATE: POP, " + str(time)
+                    task = self.solution.pop_head_task(machine.idd, time)
                     machine.taskEndTime = time+task.get_duration()
                     logger.debug("New endtime: %d", machine.taskEndTime)
                     self.history.append([ machine.idd, task.get_task_job().get_jid(), time, task.get_duration(), 'Tick ' + str(time) ])
