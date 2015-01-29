@@ -37,6 +37,7 @@ class MasterAgent(object):
         if self._MasterAgent__problemGenerator.check_new_problem(self.steps):
             new_problem = self.__problemGenerator.step(self.steps)
             logger.debug("New problem came: \n%s", new_problem)
+            failed_count = 0
             for agent in self.__slaves.values():
                 if(self.steps == 1):
                     agent.append_problem(new_problem, None)
@@ -44,6 +45,20 @@ class MasterAgent(object):
                     if agent.check_predicated_problem(new_problem):
                         logger.debug("Agent with good pred_problem")
                         new_solution = agent.get_solution()
+                        new_solution.adjustTasksWithTime(self.__timeKeeper.get_time())
+                        #logger.debug("Pretty new solution\n %s",new_solution)
+                        self.__manufacture.assign_tasks(new_solution)
+                        self.__assign_predicted_and_solution_part()
+                        break
+                    else:
+                        failed_count += 1
+            if failed_count == len(self.__slaves.values()):
+                print "WHOOOPS"
+                for agent in self.__slaves.values():
+                    if agent.is_prediction_acceptable(new_problem):
+                        print "yay"
+                        new_solution = agent.get_solution()
+                        new_solution.adjustSolutionToSubProblem(new_problem)
                         new_solution.adjustTasksWithTime(self.__timeKeeper.get_time())
                         #logger.debug("Pretty new solution\n %s",new_solution)
                         self.__manufacture.assign_tasks(new_solution)
@@ -122,6 +137,12 @@ class SlaveAgent(object):
             logger.debug("%d Checked: %s\n",self.aid, checked_problem)
             logger.debug("%d predicted: %s\n",self.aid, self.predicted_problem)
             return True
+
+    def is_prediction_acceptable(self,problem_that_came):
+        if problem_that_came.represents_superProblem(problem_that_came):
+            print "prediction acceptable, cool"
+            return True
+
 
 
 def masters_factory(count):

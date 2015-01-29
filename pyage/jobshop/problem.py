@@ -35,6 +35,14 @@ class Problem(object):
     			return False
     	return True
 
+    def represents_superProblem(self,subOther):
+        for job in self.get_jobs_list():
+    		for subjob in subOther.get_jobs_list():
+    			if job.represents_superjob(subjob):
+    				break
+    			return False
+    	return True
+
 
 class Job(object):
 	def __init__(self, jid, tasks_list):
@@ -72,6 +80,19 @@ class Job(object):
 
 	def represents_same(self, other):
 		return self.tasks_list == other.tasks_list
+
+	def represents_superjob(self,potentialSubjob):
+		for i in xrange(0,len(self.tasks_list)-1):
+			subtask =  potentialSubjob.tasks_list[i]
+			task = self.tasks_list[i]
+			if (task.get_task_job() == subtask.get_task_job()
+			and task.get_task_machine() == subtask.get_task_machine()
+			and task.get_duration() >= subtask.get_duration()):
+				print "same joooob"
+			else:
+				return False
+		return True
+
 
 class Task(object):
 	def __init__(self, machine, duration):
@@ -163,6 +184,10 @@ class Solution(object):
 		for machine in 	self.__machines_tasks:
 			for task in self.__machines_tasks[machine]:
 				task.set_start_time(task.get_start_time() + time)
+
+	def adjustSolutionToSubProblem(self, problem):
+		print "todo"
+		#todo
 
 	def __str__(self):
 		machine_strings_list = []
