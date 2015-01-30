@@ -82,11 +82,17 @@ class Job(object):
 		return self.tasks_list == other.tasks_list
 
 	def represents_superjob(self,potentialSubjob):
-		for i in xrange(0,len(self.tasks_list)-1):
+		for i in xrange(0,len(potentialSubjob.tasks_list)):
 			subtask =  potentialSubjob.tasks_list[i]
-			task = self.tasks_list[i]
-			if (task.get_task_job() == subtask.get_task_job()
-			and task.get_task_machine() == subtask.get_task_machine()
+			try:
+				task = self.tasks_list[i]
+			except IndexError:
+				print "Index error"
+				return False
+			print i
+			print subtask
+			print task
+			if (task.get_task_machine() == subtask.get_task_machine()
 			and task.get_duration() >= subtask.get_duration()):
 				print "same joooob"
 			else:
@@ -98,6 +104,7 @@ class Task(object):
 	def __init__(self, machine, duration):
 		self.machine = machine
 		self.duration = duration
+		self.start_time = -1
 
 	def __str__(self):
 		return "Start at " + str(self.start_time) + " Task of job: " + str(self.job.jid) +" at machine: " + str(self.machine) + " lasting: " + str(self.duration)
@@ -185,9 +192,31 @@ class Solution(object):
 			for task in self.__machines_tasks[machine]:
 				task.set_start_time(task.get_start_time() + time)
 
-	def adjustSolutionToSubProblem(self, problem):
-		print "todo"
-		#todo
+	def adjustSolutionToSubProblem(self, problem, oldPredictedProblem):
+		for machine in self.__machines_tasks:
+			for task in self.__machines_tasks[machine]:
+				for oldJob in oldPredictedProblem.jobs_list:
+					if task.get_task_job().represents_same(oldJob):
+						task.duration = self.get_equivalent_task_from_problem(task,problem).duration
+
+	def get_equivalent_task_from_problem(self,task,problem):
+		print "insider:"
+		print problem
+		joblist = problem.get_jobs_list()
+		if len(joblist) == 1:
+			for taskk in joblist[0].tasks_list:
+				if taskk.machine == task.machine:
+					wantedTask = taskk
+					break
+			print task.duration
+			print wantedTask.duration
+			if(task.duration < wantedTask.duration):
+				print "something is fucked up"
+			joblist[0].tasks_list.remove(wantedTask)
+			return wantedTask
+		else:
+            #todo
+			print "TODO"
 
 	def __str__(self):
 		machine_strings_list = []

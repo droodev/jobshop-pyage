@@ -44,8 +44,13 @@ class MasterAgent(object):
                 else:
                     if agent.check_predicated_problem(new_problem):
                         logger.debug("Agent with good pred_problem")
+                        print "we're good"
                         new_solution = agent.get_solution()
+                        print new_solution
                         new_solution.adjustTasksWithTime(self.__timeKeeper.get_time())
+                        print "adjusted"
+                        print new_solution
+                        print self.__timeKeeper.get_time()
                         #logger.debug("Pretty new solution\n %s",new_solution)
                         self.__manufacture.assign_tasks(new_solution)
                         self.__assign_predicted_and_solution_part()
@@ -54,11 +59,14 @@ class MasterAgent(object):
                         failed_count += 1
             if failed_count == len(self.__slaves.values()):
                 print "WHOOOPS"
+                print new_problem
                 for agent in self.__slaves.values():
                     if agent.is_prediction_acceptable(new_problem):
-                        print "yay"
+                        print agent.predicted_problem
+                        print "ADJUSTING!!!!"
+                        print new_problem
                         new_solution = agent.get_solution()
-                        new_solution.adjustSolutionToSubProblem(new_problem)
+                        new_solution.adjustSolutionToSubProblem(new_problem,agent.predicted_problem)
                         new_solution.adjustTasksWithTime(self.__timeKeeper.get_time())
                         #logger.debug("Pretty new solution\n %s",new_solution)
                         self.__manufacture.assign_tasks(new_solution)
@@ -111,7 +119,8 @@ class SlaveAgent(object):
         #logger.debug("%d New problem for slave appended: \n%s\n with predicted\n %s ", self.aid, problem, predicted_problem)
         self.population = [JobShopGenotype(problem)]
         self.predicted_problem = predicted_problem
-        print self.__evaluation.schedule(self.population[0].genes)
+        #print "append problem thingy"
+        #print self.__evaluation.schedule(self.population[0].genes)
 
     def step(self):
         #logger.debug("Slave step")
@@ -129,6 +138,7 @@ class SlaveAgent(object):
         return self.fitness
 
     def get_solution(self):
+        print "get solution"
         print self.__evaluation.schedule(self.population[0].genes)
         return self.__evaluation.schedule(self.population[0].genes)
 
@@ -139,7 +149,7 @@ class SlaveAgent(object):
             return True
 
     def is_prediction_acceptable(self,problem_that_came):
-        if problem_that_came.represents_superProblem(problem_that_came):
+        if self.predicted_problem.represents_superProblem(problem_that_came):
             print "prediction acceptable, cool"
             return True
 

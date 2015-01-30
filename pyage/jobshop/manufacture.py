@@ -21,6 +21,7 @@ class Manufacture(object):
         if self.solution is None:
             new_sol = copy.deepcopy(solution)
         else:
+            print "manufcturing"
             new_sol = self.solution.append_clone_more_solution_part(solution)
         self.solution = new_sol
         
