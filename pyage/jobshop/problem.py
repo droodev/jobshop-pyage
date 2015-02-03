@@ -110,7 +110,7 @@ class Task(object):
 		return "Start at " + str(self.start_time) + " Task of job: " + str(self.job.jid) +" at machine: " + str(self.machine) + " lasting: " + str(self.duration)
 
 	def get_str_without_jobnr(self):
-		return "Task at machine: " + str(self.machine) + " lasting: " + str(self.duration) 
+		return "Task at machine: " + str(self.machine) + " lasting: " + str(self.duration)
 
 
 	def get_duration(self):
@@ -215,8 +215,14 @@ class Solution(object):
 			joblist[0].tasks_list.remove(wantedTask)
 			return wantedTask
 		else:
-            #todo
-			print "TODO"
+			same_machine_tasks = []
+			for job in joblist:
+				for new_task in job.task_list:
+					if new_task.machine == task.machine:
+						same_machine_tasks.append(new_task)
+
+			same_machine_tasks.sort(key = lambda t: t.duration)
+			return same_machine_tasks[0]
 
 	def __str__(self):
 		machine_strings_list = []
