@@ -84,13 +84,14 @@ class RandomizedProblemProvider(object):
 		self.__jobs_distrib = job_duration_distrib
 		self.__tasks_distrib = tasks_number_distrib
 		self.__tasks_provider = tasks_provider
-		random.seed(seed)
+		self.__random = random.Random()
+		self.__random.seed(seed)
 		self.__init_randoms()
 
 	def __init_randoms(self):
-		self.__tasks_provider.init_random(random)
-		self.__tasks_distrib.init_random(random)
-		self.__jobs_distrib.init_random(random)
+		self.__tasks_provider.init_random(self.__random)
+		self.__tasks_distrib.init_random(self.__random)
+		self.__jobs_distrib.init_random(self.__random)
 
 	def generate_problem(self):
 		return Problem([self.__start_proverate_job() for _ in xrange(self.__jobs_nr)])

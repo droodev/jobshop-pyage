@@ -22,7 +22,7 @@ jobshop_agents = 3
 machines_number = 3
 logger.debug("AGGREGATE, %s agents", agents_count)
 
-seed = 1200995
+seed = None
 
 timeKeeper = lambda: TimeKeeper(5,-1)
 manufacture = lambda: Manufacture(machines_number)
@@ -38,20 +38,29 @@ start_problem_provider = RandomizedProblemProvider(
 predicted_problem_provider = RandomizedProblemProvider(
 				machines_number = machines_number,
 				jobs_number = 1,
-				job_duration_distrib = UniformIntDistribution(2,4),
-				tasks_number_distrib = UniformIntDistribution(1,1),
+				job_duration_distrib = UniformIntDistribution(2,8),
+				tasks_number_distrib = UniformIntDistribution(1,3),
 				tasks_provider = RandomizedTasksProvider(machines_number)
 				,seed = seed
 			)
 
-problemGenerator = lambda: ProblemGenerator(50, start_problem_provider, predicted_problem_provider)
+incomming_problem_provider = RandomizedProblemProvider(
+				machines_number = machines_number,
+				jobs_number = 1,
+				job_duration_distrib = UniformIntDistribution(2,8),
+				tasks_number_distrib = UniformIntDistribution(1,3),
+				tasks_provider = RandomizedTasksProvider(machines_number)
+				,seed = seed
+			)
+
+problemGenerator = lambda: ProblemGenerator(50, start_problem_provider, incomming_problem_provider)
 
 predictedProblemGenerator = lambda: PredictedProblemGenerator(predicted_problem_provider, jobshop_agents)
 
 agents = masters_factory(agents_count)
 slaves = slaves_factory(jobshop_agents)
 
-stop_condition = lambda: StepLimitStopCondition(5000)
+stop_condition = lambda: StepLimitStopCondition(2000)
 
 evaluation = lambda: BasicJobShopEvaluation(machines_number)
 selection = lambda: BasicJobShopSelection()
