@@ -60,6 +60,7 @@ class MasterAgent(object):
             if failed_count == len(self.__slaves.values()):
                 print "WHOOOPS"
                 print new_problem
+                flag = False
                 for agent in self.__slaves.values():
                     if agent.is_prediction_acceptable(new_problem):
                         print agent.predicted_problem
@@ -71,7 +72,17 @@ class MasterAgent(object):
                         #logger.debug("Pretty new solution\n %s",new_solution)
                         self.__manufacture.assign_tasks(new_solution)
                         self.__assign_predicted_and_solution_part()
+                        flag = True
                         break
+                if not flag:
+                    print "no prediction worked, assign however"
+                    solution = BasicJobShopEvaluation(self.__manufacture.machines_nr).schedule(JobShopGenotype(new_problem).genes)
+                    solution.adjustTasksWithTime(self.__timeKeeper.get_time()+1) #+1 due to starting -1?
+                    print "lets see"
+                    print new_problem
+                    print solution
+                    self.__manufacture.assign_tasks(solution)
+                    self.__assign_predicted_and_solution_part()
         for agent in self.__slaves.values():
             agent.step()
         self.steps += 1
