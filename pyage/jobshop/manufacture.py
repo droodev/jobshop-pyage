@@ -56,7 +56,7 @@ class Manufacture(object):
         for depth in xrange(reverse_depth):
             for machine in self.machines:
                 machine_tasks = self.solution.get_tasks(machine.idd)
-                if len(machine_tasks) < reverse_depth + tasks_to_leave:
+                if len(machine_tasks) < reverse_depth - depth + tasks_to_leave:
                     continue
                 tasks_list.append(machine_tasks[-1])
                 self.solution.remove_last_task(machine.idd)
