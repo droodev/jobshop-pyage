@@ -78,8 +78,7 @@ class PredictedProblemGenerator(object):
 
 class RandomizedProblemProvider(object):
 
-	def __init__(self, machines_number, jobs_number, job_duration_distrib, tasks_number_distrib, tasks_provider, seed=None):
-		self.__machines_nr = machines_number
+	def __init__(self, jobs_number, job_duration_distrib, tasks_number_distrib, tasks_provider, seed=None):
 		self.__jobs_nr = jobs_number
 		self.__jobs_distrib = job_duration_distrib
 		self.__tasks_distrib = tasks_number_distrib
@@ -112,18 +111,11 @@ class RandomizedTasksProvider(object):
 		self.__random = random_obj
 
 	def provide(self, job_duration, tasks_number):
-
-		#TODO remove this, bacause jobshop definition allows,
-		#depend on model, so it has to be refactored before
-		if tasks_number > self.__machines_nr:
-			raise Exception("Tasks number cannot be grater than machines number")
-
 		average = job_duration/tasks_number
 		std_dev = average/2
 		remaining_duration = job_duration
 		tasks = []
 		for task_counter in xrange(tasks_number):
-			#task_machine = task_counter % self.__machines_nr
 			task_machine = self.__random.randint(0,self.__machines_nr-1)
 			task_duration = int(self.__random.gauss(average, std_dev))
 			positive_task_duration = max(1, task_duration)
